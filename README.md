@@ -11,11 +11,11 @@ Gather flowers of various colors and get scored based on count and color balance
 ```
   U 2025-04-13T11:00: Brainstorming. Design conceptually on paper, don't touch the keyboard yet.
   U 2025-04-13T12:00: Commit to a concept and platform. Provision repo. Begin work.
-  U 2025-04-13 EOD  : Working model of core concept.
-  M 2025-04-14
-  T 2025-04-15
-  W 2025-04-16
-  R 2025-04-17
+  U 2025-04-13 EOD  : Resource loader and hero movements (walk, jump, downjump, walljump...)
+  M 2025-04-14      : Linked maps.
+  T 2025-04-15      : Episodes.
+  W 2025-04-16      : Collect flowers, scoring.
+  R 2025-04-17      : Hazards, interactive world things, ...
   F 2025-04-18 EOD  : Gameplay complete.
   S 2025-04-19      : Graphics, music, maps.
   U 2025-04-20      : Graphics, music, maps.
