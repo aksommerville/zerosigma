@@ -209,3 +209,20 @@ int physics_downjump(struct sprite *sprite) {
   sprite->pvy=sprite->y;
   return 1;
 }
+
+/* Check point.
+ */
+ 
+int physics_check_point(double x,double y) {
+  int col=(int)x;
+  if ((col<0)||(col>=g.scene.map->w)) return 0;
+  int row=(int)y;
+  if ((row<0)||(row>=g.scene.map->h)) return 0;
+  uint8_t cell=g.scene.map->v[row*g.scene.map->w+col];
+  uint8_t physics=g.physics[cell];
+  switch (physics) {
+    case NS_physics_solid:
+      return 1;
+  }
+  return 0;
+}

@@ -7,9 +7,7 @@ void hero_fall_begin(struct sprite *sprite) {
 }
 
 void hero_fall_end(struct sprite *sprite,double pressure) {
-  if (!SPRITE->injump) {
-    SPRITE->jump_power=HERO_JUMP_POWER_DEFAULT;
-  }
+  SPRITE->jump_power=HERO_JUMP_POWER_DEFAULT;
   if (pressure>=1.500) { // >=16m
     egg_play_sound(RID_sound_thump_huge);
     //TODO Stun Dot briefly
@@ -76,10 +74,45 @@ static void hero_downjump(struct sprite *sprite) {
   }
 }
 
+/* Begin wall jump.
+ */
+ 
+static void hero_walljump(struct sprite *sprite,double dx) {
+  egg_play_sound(RID_sound_walljump);
+  sprite->suspend_gravity=1;
+  SPRITE->walljump=1;
+  SPRITE->walljump_xpower=dx*HERO_WALLJUMPX_INITIAL;
+  SPRITE->walljump_ypower=HERO_WALLJUMPY_INITIAL;
+  SPRITE->suspendx=HERO_WALLJUMP_SUSPENDX;
+}
+
 /* Jump input.
  */
  
 static void hero_jump_begin(struct sprite *sprite) {
+
+  /* Check wall jump, if I'm not footed. This does not require jump_power.
+   * Examine a single point (well, two), just a little beyond my horizontal edges, at my vertical center.
+   * If it's solid on both sides, wall-jump straight up.
+   * Just one side, kick up and out.
+   * Neither, proceed to regular jump.
+   */
+  if (sprite->suspend_gravity||(sprite->gravclock>0.0)) {
+    const double radius=0.600;
+    int l=physics_check_point(sprite->x-radius,sprite->y);
+    int r=physics_check_point(sprite->x+radius,sprite->y);
+    if (l&&r) {
+      hero_walljump(sprite,0.0);
+      return;
+    } else if (l) {
+      hero_walljump(sprite,1.0);
+      return;
+    } else if (r) {
+      hero_walljump(sprite,-1.0);
+      return;
+    }
+  }
+
   if (SPRITE->jump_power<=0.0) return;
   if (sprite->gravclock>HERO_COYOTE_TIME) return;
   if (SPRITE->indy>0) {
@@ -95,12 +128,16 @@ static void hero_jump_begin(struct sprite *sprite) {
 static void hero_jump_end(struct sprite *sprite) {
   if (sprite->graviting) {
     // Released while falling, after the jump power expired. Let hero_fall_end() restore it.
-  } else if (SPRITE->jump_power>0.0) {
+  } else if ((SPRITE->jump_power>0.0)&&SPRITE->injump) {
     // Cut jump short. Let gravity take over, and hero_fall_end() will restore jump power.
     SPRITE->jump_power=0.0;
   } else {
     // Already landed. Restore jump power now.
     SPRITE->jump_power=HERO_JUMP_POWER_DEFAULT;
+  }
+  if (SPRITE->walljump) {
+    SPRITE->walljump=0;
+    sprite->gravity=0.0;
   }
   sprite->suspend_gravity=0;
 }

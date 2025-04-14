@@ -7,9 +7,9 @@
 #ifndef PHYSICS_H
 #define PHYSICS_H
 
-#define DEFAULT_TERMINAL_VELOCITY 14.0 /* m/s */
+#define DEFAULT_TERMINAL_VELOCITY 17.0 /* m/s */
 #define GRAVITY_ACCELERATION 20.0 /* m/s**2 */
-#define GRAVITY_START -0.250 /* m/s. <0 to create coyote time; effective gravity clamps to zero. */
+#define GRAVITY_START -0.125 /* m/s. <0 to create coyote time; effective gravity clamps to zero. */
 
 void physics_update(double elapsed);
 
@@ -17,5 +17,9 @@ void physics_update(double elapsed);
  * Can't do that, return zero.
  */
 int physics_downjump(struct sprite *sprite);
+
+/* Nonzero if this point is within some solid body.
+ */
+int physics_check_point(double x,double y);
 
 #endif

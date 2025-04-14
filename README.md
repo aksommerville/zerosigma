@@ -54,8 +54,9 @@ Gather flowers of various colors and get scored based on count and color balance
 - [x] Basic graphics. Terrain and hero.
 - [x] Load resources. map, sprite, tilesheet
 - [ ] Platforming.
-- - [ ] Down jump
-- - [ ] Wall jump
+- - [x] Down jump
+- - [x] Wall jump
+- - [ ] Fast fall
 - [ ] Map loader and connections. Use the regular door command for edge doors too.
 - [ ] Collect flowers.
 - [ ] Episodes.

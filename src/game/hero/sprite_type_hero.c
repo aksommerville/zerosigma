@@ -53,6 +53,34 @@ static void hero_update_walk(struct sprite *sprite,double elapsed) {
  
 static void hero_update_jump(struct sprite *sprite,double elapsed) {
   if (!sprite->suspend_gravity) return;
+  
+  // Wall jump.
+  if (SPRITE->walljump) {
+    if (SPRITE->walljump_xpower<0.0) {
+      if ((SPRITE->walljump_xpower+=elapsed*HERO_WALLJUMPX_DECELERATION)>=0.0) {
+        SPRITE->walljump_xpower=0.0;
+      } else {
+        sprite->x+=SPRITE->walljump_xpower*elapsed;
+      }
+    } else if (SPRITE->walljump_xpower>0.0) {
+      if ((SPRITE->walljump_xpower-=elapsed*HERO_WALLJUMPX_DECELERATION)<=0.0) {
+        SPRITE->walljump_xpower=0.0;
+      } else {
+        sprite->x+=SPRITE->walljump_xpower*elapsed;
+      }
+    }
+    if ((SPRITE->walljump_ypower-=elapsed*HERO_WALLJUMPY_DECELERATION)<=0.0) {
+      SPRITE->walljump=0;
+      sprite->suspend_gravity=0;
+      sprite->gravity=0.0;
+      SPRITE->jump_power=0.0;
+      return;
+    }
+    sprite->y-=SPRITE->walljump_ypower*elapsed;
+    return;
+  }
+  
+  // Regular jump.
   SPRITE->jump_power-=elapsed*HERO_JUMP_POWER_DECELERATION;
   if (SPRITE->jump_power<=0.0) {
     sprite->suspend_gravity=0;
@@ -66,7 +94,15 @@ static void hero_update_jump(struct sprite *sprite,double elapsed) {
  
 static void _hero_update(struct sprite *sprite,double elapsed) {
   hero_animate(sprite,elapsed);
-  if (SPRITE->walkdx) hero_update_walk(sprite,elapsed);
+  
+  if (SPRITE->suspendx>0.0) {
+    SPRITE->suspendx-=elapsed;
+    if ((SPRITE->walkdx<0)&&(SPRITE->walljump_xpower<=0.0)) hero_update_walk(sprite,elapsed);
+    else if ((SPRITE->walkdx>0)&&(SPRITE->walljump_xpower>=0.0)) hero_update_walk(sprite,elapsed);
+  } else if (SPRITE->walkdx) {
+    hero_update_walk(sprite,elapsed);
+  }
+  
   if (SPRITE->injump) hero_update_jump(sprite,elapsed);
 }
 
