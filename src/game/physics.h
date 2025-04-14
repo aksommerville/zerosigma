@@ -7,8 +7,15 @@
 #ifndef PHYSICS_H
 #define PHYSICS_H
 
-#define DEFAULT_TERMINAL_VELOCITY 6.0 /* m/s */
+#define DEFAULT_TERMINAL_VELOCITY 14.0 /* m/s */
+#define GRAVITY_ACCELERATION 20.0 /* m/s**2 */
+#define GRAVITY_START -0.250 /* m/s. <0 to create coyote time; effective gravity clamps to zero. */
 
 void physics_update(double elapsed);
+
+/* If (sprite) is supported exclusively by oneway tiles, move it down slightly to skip them and return positive.
+ * Can't do that, return zero.
+ */
+int physics_downjump(struct sprite *sprite);
 
 #endif

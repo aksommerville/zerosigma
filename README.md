@@ -30,11 +30,32 @@ Gather flowers of various colors and get scored based on count and color balance
   S 2025-04-26T11:00: Submissions close.
 ```
 
+## Actual Daily Progress
+
+```
+  U 2025-04-13: Concept, repo, nice hero walking graphics, sketchy division of labor, provisional partial physics.
+  M 2025-04-14
+  T 2025-04-15
+  W 2025-04-16
+  R 2025-04-17
+  F 2025-04-18
+  S 2025-04-19
+  U 2025-04-20
+  M 2025-04-21
+  T 2025-04-22
+  W 2025-04-23
+  R 2025-04-24
+  F 2025-04-25
+  S 2025-04-26
+```
+
 ## TODO
 
 - [x] Basic graphics. Terrain and hero.
 - [x] Load resources. map, sprite, tilesheet
 - [ ] Platforming.
+- - [ ] Down jump
+- - [ ] Wall jump
 - [ ] Map loader and connections. Use the regular door command for edge doors too.
 - [ ] Collect flowers.
 - [ ] Episodes.

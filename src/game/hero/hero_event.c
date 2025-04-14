@@ -4,11 +4,26 @@
  */
  
 void hero_fall_begin(struct sprite *sprite) {
-  fprintf(stderr,"%s\n",__func__);
 }
 
-void hero_fall_end(struct sprite *sprite) {
-  fprintf(stderr,"%s\n",__func__);
+void hero_fall_end(struct sprite *sprite,double pressure) {
+  if (!SPRITE->injump) {
+    SPRITE->jump_power=HERO_JUMP_POWER_DEFAULT;
+  }
+  if (pressure>=1.500) { // >=16m
+    egg_play_sound(RID_sound_thump_huge);
+    //TODO Stun Dot briefly
+    //TODO Dust clouds
+  } else if (pressure>=1.000) { // >=9m
+    egg_play_sound(RID_sound_thump_big);
+    //TODO Stun Dot briefly
+    //TODO Dust clouds
+  } else if (pressure>=0.750) { // >=6m
+    egg_play_sound(RID_sound_thump_middle);
+    //TODO Dust clouds
+  } else if (pressure>=0.500) { // >=3m
+    egg_play_sound(RID_sound_thump_little);
+  }
 }
 
 /* Horizontal input state change.
@@ -46,21 +61,55 @@ static void hero_indx_changed(struct sprite *sprite) {
  */
  
 static void hero_indy_changed(struct sprite *sprite) {
+  //TODO Ladders.
+  //TODO Duck.
+}
+
+/* Begin down jump.
+ */
+ 
+static void hero_downjump(struct sprite *sprite) {
+  if (physics_downjump(sprite)) {
+    egg_play_sound(RID_sound_downjump);
+  } else {
+    egg_play_sound(RID_sound_reject);
+  }
 }
 
 /* Jump input.
  */
  
 static void hero_jump_begin(struct sprite *sprite) {
+  if (SPRITE->jump_power<=0.0) return;
+  if (sprite->gravclock>HERO_COYOTE_TIME) return;
+  if (SPRITE->indy>0) {
+    hero_downjump(sprite);
+    SPRITE->injump=0;
+    SPRITE->jump_power=HERO_JUMP_POWER_DEFAULT;
+  } else {
+    sprite->suspend_gravity=1;
+    egg_play_sound(RID_sound_jump);
+  }
 }
 
 static void hero_jump_end(struct sprite *sprite) {
+  if (sprite->graviting) {
+    // Released while falling, after the jump power expired. Let hero_fall_end() restore it.
+  } else if (SPRITE->jump_power>0.0) {
+    // Cut jump short. Let gravity take over, and hero_fall_end() will restore jump power.
+    SPRITE->jump_power=0.0;
+  } else {
+    // Already landed. Restore jump power now.
+    SPRITE->jump_power=HERO_JUMP_POWER_DEFAULT;
+  }
+  sprite->suspend_gravity=0;
 }
 
 /* Item input.
  */
  
 static void hero_item_begin(struct sprite *sprite) {
+  //TODO Items. Will there be such a thing?
 }
 
 static void hero_item_end(struct sprite *sprite) {

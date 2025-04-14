@@ -17,12 +17,15 @@ struct sprite {
   uint8_t tileid,xform;
   double phl,phr,pht,phb; // Signed offset to my four edges.
   double terminal_velocity; // Gets a global default initially. Zero for no gravity.
+  int suspend_gravity; // Nonzero to suspend gravity temporarily. Controller sets and clears.
   int solid; // Nonzero to participate in sprite-on-sprite physics.
   uint32_t physics_mask; // Which physics values are solid to me, eg (1<<NS_physics_solid).
   int defunct;
   
   // Private to physics:
   int graviting;
+  double gravity; // m/s, volatile
+  double gravclock;
   double pvx,pvy;
 };
 
@@ -38,7 +41,7 @@ struct sprite_type {
   
   // Physics notifications.
   void (*fall_begin)(struct sprite *sprite);
-  void (*fall_end)(struct sprite *sprite);
+  void (*fall_end)(struct sprite *sprite,double duration); // (duration) in seconds
 };
 
 /* Plain sprite_new() DOES NOT call (type->init).

@@ -25,6 +25,7 @@ struct sprite *sprite_new(const struct sprite_type *type) {
   sprite->terminal_velocity=DEFAULT_TERMINAL_VELOCITY;
   sprite->solid=0;
   sprite->physics_mask=0;
+  sprite->gravity=GRAVITY_START;
   
   return sprite;
 }
