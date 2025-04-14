@@ -2,6 +2,7 @@
 
 struct zs_layer_play {
   struct zs_layer hdr;
+  int pvinput; // Last state reported to scene.
 };
 
 #define LAYER ((struct zs_layer_play*)layer)
@@ -16,7 +17,15 @@ static void _play_del(struct zs_layer *layer) {
  */
  
 static void _play_update(struct zs_layer *layer,double elapsed,int input,int pvinput) {
-  //TODO Detect and deliver input events.
+  if (input!=pvinput) {
+    int bit=0x4000;
+    for (;bit;bit>>=1) {
+      int nx=input&bit,pv=pvinput&bit;
+      if (nx&&!pv) scene_button_down(bit);
+      else if (!nx&&pv) scene_button_up(bit);
+    }
+    LAYER->pvinput=input;
+  }
   scene_update(elapsed);
 }
 
@@ -24,6 +33,16 @@ static void _play_update(struct zs_layer *layer,double elapsed,int input,int pvi
  */
  
 static void _play_focus(struct zs_layer *layer,int focus) {
+  if (focus) {
+  } else {
+    if (LAYER->pvinput) {
+      int bit=0x4000;
+      for (;bit;bit>>=1) {
+        if (LAYER->pvinput&bit) scene_button_up(bit);
+      }
+      LAYER->pvinput=0;
+    }
+  }
 }
 
 /* Render.

@@ -15,6 +15,15 @@ struct sprite {
   int cmdc;
   double x,y; // In meters (ie map cells)
   uint8_t tileid,xform;
+  double phl,phr,pht,phb; // Signed offset to my four edges.
+  double terminal_velocity; // Gets a global default initially. Zero for no gravity.
+  int solid; // Nonzero to participate in sprite-on-sprite physics.
+  uint32_t physics_mask; // Which physics values are solid to me, eg (1<<NS_physics_solid).
+  int defunct;
+  
+  // Private to physics:
+  int graviting;
+  double pvx,pvy;
 };
 
 struct sprite_type {
@@ -26,6 +35,10 @@ struct sprite_type {
   
   // Sprites that do not implement (render) must be single tiles from image:sprites.
   void (*render)(struct sprite *sprite,int x,int y);
+  
+  // Physics notifications.
+  void (*fall_begin)(struct sprite *sprite);
+  void (*fall_end)(struct sprite *sprite);
 };
 
 /* Plain sprite_new() DOES NOT call (type->init).
@@ -46,5 +59,11 @@ const struct sprite_type *sprite_type_from_id(int id);
 #define _(tag) extern const struct sprite_type sprite_type_##tag;
 SPRCTL_FOR_EACH
 #undef _
+
+/* Type-specific API.
+ ***************************************************************************/
+ 
+void hero_button_down(struct sprite *sprite,int btnid);
+void hero_button_up(struct sprite *sprite,int btnid);
 
 #endif

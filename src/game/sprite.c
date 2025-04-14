@@ -17,6 +17,15 @@ struct sprite *sprite_new(const struct sprite_type *type) {
   struct sprite *sprite=calloc(type->objlen,1);
   if (!sprite) return 0;
   sprite->type=type;
+  
+  sprite->phl=-0.5;
+  sprite->phr=0.5;
+  sprite->pht=-0.5;
+  sprite->phb=0.5;
+  sprite->terminal_velocity=DEFAULT_TERMINAL_VELOCITY;
+  sprite->solid=0;
+  sprite->physics_mask=0;
+  
   return sprite;
 }
 
@@ -94,8 +103,8 @@ struct sprite *sprite_spawn_rid(double x,double y,int rid,uint32_t arg) {
   if (!sprite) return 0;
   sprite->rid=rid;
   sprite->arg=arg;
-  sprite->x=x;
-  sprite->y=y;
+  sprite->x=sprite->pvx=x;
+  sprite->y=sprite->pvy=y;
   sprite->cmdv=src;
   sprite->cmdc=srcc;
   sprite_read_generic_commands(sprite);
@@ -107,8 +116,8 @@ struct sprite *sprite_spawn_type(double x,double y,const struct sprite_type *typ
   struct sprite *sprite=sprite_new(type);
   if (!sprite) return 0;
   sprite->arg=arg;
-  sprite->x=x;
-  sprite->y=y;
+  sprite->x=sprite->pvx=x;
+  sprite->y=sprite->pvy=y;
   return sprite_spawn_finish(sprite);
 }
   

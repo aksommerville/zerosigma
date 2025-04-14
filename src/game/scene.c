@@ -62,8 +62,34 @@ static void scene_update_sprites(double elapsed) {
   while (i-->0) {
     struct sprite *sprite=g.spritev[i];
     if (!sprite->type->update) continue;
+    if (sprite->defunct) continue;
     sprite->type->update(sprite,elapsed);
   }
+}
+
+/* Reap defunct sprites.
+ */
+ 
+static void reap_defunct_sprites() {
+  int i=g.spritec;
+  while (i-->0) {
+    struct sprite *sprite=g.spritev[i];
+    if (!sprite->defunct) continue;
+    g.spritec--;
+    memmove(g.spritev+i,g.spritev+i+1,sizeof(void*)*(g.spritec-i));
+    sprite_del(sprite);
+  }
+}
+
+/* Input events.
+ */
+ 
+void scene_button_down(int btnid) {
+  hero_button_down(scene_get_hero(),btnid);
+}
+
+void scene_button_up(int btnid) {
+  hero_button_up(scene_get_hero(),btnid);
 }
 
 /* Update.
@@ -71,16 +97,35 @@ static void scene_update_sprites(double elapsed) {
  
 void scene_update(double elapsed) {
   scene_update_sprites(elapsed);
-  //TODO
+  reap_defunct_sprites();
+  physics_update(elapsed);
+  //TODO Terminal conditions.
 }
 
 /* Refresh camera's position.
  */
  
 static void scene_calculate_scroll() {
-  //TODO
-  g.scene.scrollx=0;
-  g.scene.scrolly=0;
+  struct sprite *hero=scene_get_hero();
+  if (!hero) return;
+  int worldw=g.scene.map->w*NS_sys_tilesize;
+  if (worldw<=FBW) {
+    g.scene.scrollx=(worldw>>1)-(FBW>>1);
+  } else {
+    int midx=(int)(hero->x*NS_sys_tilesize);
+    g.scene.scrollx=midx-(FBW>>1);
+    if (g.scene.scrollx<0) g.scene.scrollx=0;
+    else if (g.scene.scrollx>worldw-FBW) g.scene.scrollx=worldw-FBW;
+  }
+  int worldh=g.scene.map->h*NS_sys_tilesize;
+  if (worldh<=FBH) {
+    g.scene.scrolly=(worldh>>1)-(FBH>>1);
+  } else {
+    int midy=(int)(hero->y*NS_sys_tilesize);
+    g.scene.scrolly=midy-(FBH>>1);
+    if (g.scene.scrolly<0) g.scene.scrolly=0;
+    else if (g.scene.scrolly>worldh-FBH) g.scene.scrolly=worldh-FBH;
+  }
 }
 
 /* Render sky, and if warranted, blotter.
@@ -152,4 +197,16 @@ void scene_render() {
   scene_render_map();
   scene_render_sprites();
   scene_render_overlay();
+}
+
+/* Sprite list.
+ */
+ 
+struct sprite *scene_get_hero() {
+  int i=g.spritec;
+  while (i-->0) {
+    struct sprite *sprite=g.spritev[i];
+    if (sprite->type==&sprite_type_hero) return sprite;
+  }
+  return 0;
 }

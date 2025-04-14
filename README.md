@@ -33,7 +33,7 @@ Gather flowers of various colors and get scored based on count and color balance
 ## TODO
 
 - [x] Basic graphics. Terrain and hero.
-- [ ] Load resources. map, sprite, tilesheet
+- [x] Load resources. map, sprite, tilesheet
 - [ ] Platforming.
 - [ ] Map loader and connections. Use the regular door command for edge doors too.
 - [ ] Collect flowers.

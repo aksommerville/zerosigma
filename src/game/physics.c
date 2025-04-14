@@ -1,0 +1,160 @@
+#include "zs.h"
+
+#define SPACE_FUDGE 0.010
+
+/* Check and correct collisions for one sprite after applying gravity.
+ * As a rule, we will only correct upward.
+ * Returns nonzero if we corrected something.
+ */
+ 
+static int physics_resolve_gravity_collisions(struct sprite *sprite) {
+  if (!sprite->physics_mask) return 0;
+
+  /* Grid only needs checked if my foot passed from <= grid line to > grid line.
+   */
+  double pvy=sprite->pvy+sprite->phb;
+  double y=sprite->y+sprite->phb;
+  int row=(int)y;
+  double frow=(double)row;
+  if ((pvy<=frow)&&(y>frow)) {
+    int cola=(int)(sprite->x+sprite->phl+SPACE_FUDGE); if (cola<0) cola=0;
+    int colz=(int)(sprite->x+sprite->phr-SPACE_FUDGE); if (colz>=g.scene.map->w) colz=g.scene.map->w-1;
+    const uint8_t *cell=g.scene.map->v+row*g.scene.map->w+cola;
+    int col=cola; for (;col<=colz;col++,cell++) {
+      uint8_t physics=g.physics[*cell];
+      if (physics==NS_physics_oneway) physics=NS_physics_solid;
+      if (sprite->physics_mask&(1<<physics)) {
+        sprite->y=frow-sprite->phb;
+        return 1;
+      }
+    }
+  }
+  
+  //TODO Sprite-on-sprite collisions.
+  return 0;
+}
+
+/* Escape sprite from a rectangular collision.
+ */
+ 
+static void physics_escape_box(struct sprite *sprite,double l,double t,double r,double b) {
+  double escl=sprite->x+sprite->phr-l;
+  double escr=r-sprite->phl-sprite->x;
+  double esct=sprite->y+sprite->phb-t;
+  double escb=b-sprite->pht-sprite->y;
+  if ((escl<=escr)&&(escl<=esct)&&(escl<=escb)) {
+    sprite->x=l-sprite->phr;
+  } else if ((escr<=esct)&&(escr<=escb)) {
+    sprite->x=r-sprite->phl;
+  } else if (esct<=escb) {
+    sprite->y=t-sprite->phb;
+  } else {
+    sprite->y=b-sprite->pht;
+  }
+}
+
+/* Resolve sprite-on-map collisions.
+ */
+ 
+static void physics_resolve_map() {
+  int i=g.spritec;
+  while (i-->0) {
+    struct sprite *sprite=g.spritev[i];
+    if (!sprite->physics_mask) continue;
+    int cola=(int)(sprite->x+sprite->phl); if (cola<0) cola=0;
+    int colz=(int)(sprite->x+sprite->phr); if (colz>=g.scene.map->w) colz=g.scene.map->w-1;
+    int rowa=(int)(sprite->y+sprite->pht); if (rowa<0) rowa=0;
+    int rowz=(int)(sprite->y+sprite->phb); if (rowz>=g.scene.map->h) rowz=g.scene.map->h-1;
+    
+    // Move in the direction implied by (pvx,pvy). This is important, to avoid stubbing toes.
+    int dcol,drow;
+    if (sprite->pvx<=sprite->x) {
+      dcol=1;
+      colz++;
+    } else {
+      dcol=-1;
+      int tmp=cola;
+      cola=colz;
+      colz=tmp;
+      colz--;
+    }
+    if (sprite->pvy<=sprite->y) {
+      drow=1;
+      rowz++;
+    } else {
+      drow=-1;
+      int tmp=rowa;
+      rowa=rowz;
+      rowz=tmp;
+      rowz--;
+    }
+    
+    const uint8_t *cellrow=g.scene.map->v+rowa*g.scene.map->w+cola;
+    int row=rowa; for (;row!=rowz;row+=drow,cellrow+=g.scene.map->w*drow) {
+      const uint8_t *cell=cellrow;
+      int col=cola; for (;col!=colz;col+=dcol,cell+=dcol) {
+        uint8_t physics=g.physics[*cell];
+        if (!(sprite->physics_mask&(1<<physics))) continue;
+        physics_escape_box(sprite,col,row,col+1.0,row+1.0);
+      }
+    }
+  }
+}
+
+/* Resolve sprite-on-sprite collisions.
+ */
+ 
+static void physics_resolve_sprites() {
+  //TODO
+}
+
+/* Replace each sprite's (pvx,pvy).
+ */
+ 
+static void physics_assign_pv() {
+  struct sprite **p=g.spritev;
+  int i=g.spritec;
+  for (;i-->0;p++) {
+    struct sprite *sprite=*p;
+    sprite->pvx=sprite->x;
+    sprite->pvy=sprite->y;
+  }
+}
+
+/* Apply gravity.
+ */
+ 
+static void physics_apply_gravity(double elapsed) {
+  int i=g.spritec;
+  while (i-->0) {
+    struct sprite *sprite=g.spritev[i];
+    if (sprite->terminal_velocity<=0.0) continue;
+    sprite->y+=sprite->terminal_velocity*elapsed;//TODO accelerate
+    if (physics_resolve_gravity_collisions(sprite)) {
+      if (sprite->graviting) {
+        sprite->graviting=0;
+        sprite->pvy=sprite->y;
+        if (sprite->type->fall_end) sprite->type->fall_end(sprite);
+      } else {
+        // Collision on a first-try for gravity: Forget we tried it.
+        sprite->y=sprite->pvy;
+      }
+    } else {
+      sprite->pvy=sprite->y;
+      if (!sprite->graviting) {
+        sprite->graviting=1;
+        if (sprite->type->fall_begin) sprite->type->fall_begin(sprite);
+      }
+    }
+  }
+}
+
+/* Update, main entry point.
+ */
+ 
+void physics_update(double elapsed) {
+  physics_resolve_map();
+  physics_resolve_sprites();
+  physics_assign_pv();
+  physics_apply_gravity(elapsed);
+}

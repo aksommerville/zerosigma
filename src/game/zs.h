@@ -16,6 +16,7 @@
 #include "sprite.h"
 #include "session.h"
 #include "scene.h"
+#include "physics.h"
 
 extern struct g {
   void *rom;

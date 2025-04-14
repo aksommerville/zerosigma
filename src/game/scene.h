@@ -14,7 +14,12 @@ struct scene {
 
 int scene_reset();
 
+void scene_button_down(int btnid);
+void scene_button_up(int btnid);
+
 void scene_update(double elapsed);
 void scene_render();
+
+struct sprite *scene_get_hero();
 
 #endif
