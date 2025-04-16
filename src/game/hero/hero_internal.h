@@ -15,6 +15,7 @@
 #define HERO_WALLJUMP_SUSPENDX 0.150 /* s */
 #define HERO_FASTFALL_VELOCITY 28.0 /* m/s */
 #define HERO_WALLGRAB_VELOCITY 4.0 /* m/s */
+#define HERO_LADDER_CLIMB_SPEED 4.0 /* m/s */
 
 struct sprite_hero {
   struct sprite hdr;
@@ -33,6 +34,7 @@ struct sprite_hero {
   double sorefoot; // Counts down while hurt.
   int wallgrab;
   int seated;
+  double ladderx; // >0.0, center of ladder column, if we're climbing.
 };
 
 #define SPRITE ((struct sprite_hero*)sprite)

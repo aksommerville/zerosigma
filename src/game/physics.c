@@ -28,6 +28,11 @@ static int physics_resolve_gravity_collisions(struct sprite *sprite) {
     int col=cola; for (;col<=colz;col++,cell++) {
       uint8_t physics=g.physics[*cell];
       if (physics==NS_physics_oneway) physics=NS_physics_solid;
+      if (physics==NS_physics_ladder) {
+        if ((row>0)&&(g.physics[g.scene.map->v[(row-1)*g.scene.map->w+col]]==NS_physics_vacant)) {
+          physics=NS_physics_solid;
+        }
+      }
       if (sprite->physics_mask&(1<<physics)) {
         sprite->y=frow-sprite->phb;
         return 1;

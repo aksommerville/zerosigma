@@ -61,15 +61,55 @@ static void hero_indx_changed(struct sprite *sprite) {
   }
   
   // If we're entering a positive state, bump the animation clock to zero to force a face change.
+  // Also release the ladder if applicable.
   if (SPRITE->indx) {
     SPRITE->animclock=0.0;
+    if (SPRITE->ladderx>0.0) {
+      SPRITE->ladderx=0.0;
+      sprite->suspend_gravity=0;
+    }
   }
+}
+
+/* Grab a ladder if there's one handy.
+ * Returns nonzero if grabbed, and updates all relevant state.
+ */
+ 
+static int hero_check_ladder(struct sprite *sprite) {
+  if (SPRITE->sorefoot>0.0) return 0;
+  int col=(int)sprite->x,row=(int)sprite->y;
+  if ((col<0)||(row<0)||(col>=g.scene.map->w)||(row>=g.scene.map->h)) return 0;
+  uint8_t physics=g.physics[g.scene.map->v[row*g.scene.map->w+col]];
+  if (physics!=NS_physics_ladder) {
+    if ((SPRITE->indy>0)&&(row<g.scene.map->h-1)&&(g.physics[g.scene.map->v[(row+1)*g.scene.map->w+col]]==NS_physics_ladder)) {
+      sprite->y+=0.75;
+      // and proceed
+    } else {
+      return 0;
+    }
+  }
+  sprite->x=SPRITE->ladderx=col+0.5;
+  sprite->suspend_gravity=1;
+  SPRITE->fastfall=0;
+  SPRITE->wallgrab=0;
+  SPRITE->seated=0;
+  SPRITE->suspendx=0.0;
+  SPRITE->walljump=0;
+  return 1;
 }
 
 /* Vertical input state change.
  */
  
 static void hero_indy_changed(struct sprite *sprite) {
+
+  /* If we're on a ladder, no action necessary.
+   * Otherwise, on nonzero changes, check whether there's a ladder to grab.
+   */
+  if (SPRITE->ladderx>0.0) return;
+  if (SPRITE->indy) {
+    if (hero_check_ladder(sprite)) return;
+  }
 
   if ((SPRITE->indy>0)&&SPRITE->injump&&(SPRITE->jump_power>0.0)) {
     SPRITE->jump_power=0.0;
@@ -137,6 +177,15 @@ static void hero_walljump(struct sprite *sprite,double dx) {
 static void hero_jump_begin(struct sprite *sprite) {
 
   if (SPRITE->sorefoot>0.0) return;
+  
+  // No matter what else happens, when you press Jump, you are no longer climbing a ladder.
+  if (SPRITE->ladderx>0.0) {
+    SPRITE->ladderx=0.0;
+    SPRITE->animclock=0.0;
+    SPRITE->animframe=0;
+    sprite->suspend_gravity=0;
+    SPRITE->jump_power=HERO_JUMP_POWER_DEFAULT;
+  }
 
   /* Check wall jump, if I'm not footed. This does not require jump_power.
    * Examine a single point (well, two), just a little beyond my horizontal edges, at my vertical center.
@@ -175,6 +224,7 @@ static void hero_jump_begin(struct sprite *sprite) {
 }
 
 static void hero_jump_end(struct sprite *sprite) {
+  if (SPRITE->ladderx>0.0) return;
   if (sprite->graviting) {
     // Released while falling, after the jump power expired. Let hero_fall_end() restore it.
   } else if ((SPRITE->jump_power>0.0)&&SPRITE->injump) {

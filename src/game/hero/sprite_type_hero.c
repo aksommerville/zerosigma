@@ -21,6 +21,17 @@ static int _hero_init(struct sprite *sprite) {
  */
  
 static void hero_animate(struct sprite *sprite,double elapsed) {
+
+  // Climbing ladder: Hold current frame, or animate if moving vertically.
+  // It's only 4 frames, at half the speed of walking, but we use the same walk timing anyway.
+  if (SPRITE->ladderx>0.0) {
+    if (!SPRITE->indy) return;
+    if ((SPRITE->animclock-=elapsed)>0.0) return;
+    SPRITE->animclock+=0.100;
+    if (++(SPRITE->animframe)>=8) SPRITE->animframe=0;
+    return;
+  }
+
   if ((SPRITE->animclock-=elapsed)>0.0) return;
   SPRITE->animclock+=0.100;
   
@@ -75,6 +86,8 @@ static void hero_update_jump(struct sprite *sprite,double elapsed) {
       sprite->suspend_gravity=0;
       sprite->gravity=0.0;
       SPRITE->jump_power=0.0;
+      if (SPRITE->indx<0) sprite->xform=EGG_XFORM_XREV;
+      else if (SPRITE->indx>0) sprite->xform=0;
       return;
     }
     sprite->y-=SPRITE->walljump_ypower*elapsed;
@@ -110,11 +123,42 @@ static void hero_update_wallgrab(struct sprite *sprite) {
   sprite->terminal_velocity=HERO_WALLGRAB_VELOCITY;
 }
 
+/* Ladder.
+ */
+ 
+static void hero_update_ladder(struct sprite *sprite,double elapsed) {
+  sprite->x=SPRITE->ladderx;
+  if (SPRITE->indy) {
+    sprite->y+=HERO_LADDER_CLIMB_SPEED*elapsed*SPRITE->indy;
+    int col=(int)sprite->x,row=(int)sprite->y;
+    if ((row<0)||(row>=g.scene.map->h)) {
+      // OOB vertically, just roll with it. Probably a ladder into an adjoining map.
+    } else if ((col<0)||(col>=g.scene.map->w)||(g.physics[g.scene.map->v[row*g.scene.map->w+col]]!=NS_physics_ladder)) {
+      SPRITE->ladderx=0.0;
+      SPRITE->animclock=0.0;
+      SPRITE->animframe=0;
+      sprite->suspend_gravity=0;
+      sprite->gravity=0.0;
+      SPRITE->jump_power=HERO_JUMP_POWER_DEFAULT;
+      if (SPRITE->indy>0) {
+        sprite->y=row-0.5;
+      } else {
+        sprite->y=row+0.5;
+      }
+    }
+  }
+}
+
 /* Update.
  */
  
 static void _hero_update(struct sprite *sprite,double elapsed) {
   hero_animate(sprite,elapsed);
+  
+  if (SPRITE->ladderx>0.0) {
+    hero_update_ladder(sprite,elapsed);
+    return;
+  }
   
   if (SPRITE->suspendx>0.0) {
     SPRITE->suspendx-=elapsed;
@@ -146,7 +190,14 @@ static void _hero_render(struct sprite *sprite,int x,int y) {
   /* Main body is always two tiles, in the same column.
    */
   uint8_t col=0;
-  if (SPRITE->sorefoot>0.0) {
+  if (SPRITE->ladderx>0.0) {
+    switch (SPRITE->animframe>>1) {
+      case 0: col=0x0b; break;
+      case 1: col=0x0c; break;
+      case 2: col=0x0d; break;
+      case 3: col=0x0c; break;
+    }
+  } else if (SPRITE->sorefoot>0.0) {
     col=7;
   } else if (SPRITE->fastfall) {
     col=(SPRITE->animframe&1)?5:6;
