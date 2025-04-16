@@ -12,7 +12,7 @@
 #define HERO_WALLJUMPY_INITIAL 24.0 /* m/s */
 #define HERO_WALLJUMPX_DECELERATION 100.0 /* m/s**2 */
 #define HERO_WALLJUMPY_DECELERATION 100.0 /* m/s**2 */
-#define HERO_WALLJUMP_SUSPENDX 0.500 /* s */
+#define HERO_WALLJUMP_SUSPENDX 0.150 /* s */
 #define HERO_FASTFALL_VELOCITY 28.0 /* m/s */
 #define HERO_WALLGRAB_VELOCITY 4.0 /* m/s */
 

@@ -35,7 +35,7 @@ Gather flowers of various colors and get scored based on count and color balance
 ```
   U 2025-04-13: Concept, repo, nice hero walking graphics, sketchy division of labor, provisional partial physics.
   M 2025-04-14: Jump, downjump, walljump. Gravity and basic motions feel ok. Sketch of background music (petal_to_the_metal).
-  T 2025-04-15
+  T 2025-04-15: Music refined, home map cleaned up, fastfall, wallgrab.
   W 2025-04-16
   R 2025-04-17
   F 2025-04-18
@@ -57,7 +57,7 @@ Gather flowers of various colors and get scored based on count and color balance
 - - [x] Down jump
 - - [x] Wall jump
 - - [x] Fast fall
-- [ ] Map loader and connections. Use the regular door command for edge doors too.
+- [x] Map loader and connections. Use the regular door command for edge doors too.
 - [ ] Collect flowers.
 - [ ] Episodes.
 - [ ] Scoring.

@@ -69,6 +69,169 @@ static int zs_res_add(const struct rom_res *src) {
   return 0;
 }
 
+/* With all the maps loaded, identify doors and record them in both impacted maps.
+ * Doors are stored just once, doesn't matter which side.
+ */
+ 
+static int zs_res_add_door(struct zs_map *a,const struct rom_command *cmd) {
+
+  // Split command, acquire "b" map, confirm we have room for a new door in each.
+  int ax=cmd->argv[0];
+  int ay=cmd->argv[1];
+  int brid=(cmd->argv[2]<<8)|cmd->argv[3];
+  int bx=cmd->argv[4];
+  int by=cmd->argv[5];
+  int comment=(cmd->argv[6]<<8)|cmd->argv[7]; // not actually using yet, probly won't
+  struct zs_map *b=zs_map_get(brid);
+  if (!b) {
+    fprintf(stderr,"map:%d not found, referenced by door in map:%d\n",brid,a->rid);
+    return -1;
+  }
+  if (a->doorc>=ZS_DOOR_LIMIT) {
+    fprintf(stderr,"Too many doors in map:%d, limit %d\n",a->rid,ZS_DOOR_LIMIT);
+    return -1;
+  }
+  if (b->doorc>=ZS_DOOR_LIMIT) {
+    fprintf(stderr,"Too many doors in map:%d, limit %d\n",brid,ZS_DOOR_LIMIT);
+    return -1;
+  }
+  
+  /* Position must lie on one edge, with the other axis in 1..c-2, ie not in a corner.
+   * The remote position must lie on the opposite edge.
+   * Initially set each door just 1 cell wide.
+   */
+  struct zs_door *adoor=a->doorv+a->doorc++;
+  struct zs_door *bdoor=b->doorv+b->doorc++;
+  adoor->mapid=brid;
+  bdoor->mapid=a->rid;
+  #define ASSERT_POSITION(n,lo,hi,rid,x,y) { \
+    if (((n)<(lo))||((n)>(hi))) { \
+      fprintf(stderr,"Invalid door position %d,%d in map:%d\n",x,y,rid); \
+      return -1; \
+    } \
+  }
+  if (ax==0) {
+    ASSERT_POSITION(ay,1,a->h-2,a->rid,ax,ay)
+    ASSERT_POSITION(bx,b->w-1,b->w-1,b->rid,bx,by)
+    ASSERT_POSITION(by,1,b->h-2,b->rid,bx,by)
+    adoor->edge=ZS_EDGE_W;
+    bdoor->edge=ZS_EDGE_E;
+    adoor->p=ay;
+    adoor->c=1;
+    adoor->d=by-ay;
+    bdoor->p=by;
+    bdoor->c=1;
+    bdoor->d=ay-by;
+  } else if (ax==a->w-1) {
+    ASSERT_POSITION(ay,1,a->h-2,a->rid,ax,ay)
+    ASSERT_POSITION(bx,0,0,b->rid,bx,by)
+    ASSERT_POSITION(by,1,b->h-2,b->rid,bx,by)
+    adoor->edge=ZS_EDGE_E;
+    bdoor->edge=ZS_EDGE_W;
+    adoor->p=ay;
+    adoor->c=1;
+    adoor->d=by-ay;
+    bdoor->p=by;
+    bdoor->c=1;
+    bdoor->d=ay-by;
+  } else if (ay==0) {
+    ASSERT_POSITION(ax,1,a->w-2,a->rid,ax,ay)
+    ASSERT_POSITION(by,b->h-1,b->h-1,b->rid,bx,by)
+    ASSERT_POSITION(bx,1,b->w-2,b->rid,bx,by)
+    adoor->edge=ZS_EDGE_N;
+    bdoor->edge=ZS_EDGE_S;
+    adoor->p=ax;
+    adoor->c=1;
+    adoor->d=bx-ax;
+    bdoor->p=bx;
+    bdoor->c=1;
+    bdoor->d=ax-bx;
+  } else if (ay==a->h-1) {
+    ASSERT_POSITION(ax,1,a->w-2,a->rid,ax,ay)
+    ASSERT_POSITION(by,0,0,b->rid,bx,by)
+    ASSERT_POSITION(bx,1,b->w-2,b->rid,bx,by)
+    adoor->edge=ZS_EDGE_S;
+    bdoor->edge=ZS_EDGE_N;
+    adoor->p=ax;
+    adoor->c=1;
+    adoor->d=bx-ax;
+    bdoor->p=bx;
+    bdoor->c=1;
+    bdoor->d=ax-bx;
+  } else {
+    fprintf(stderr,"Invalid position %d,%d for door in map:%d\n",ax,ay,a->rid);
+    return -1;
+  }
+  #undef ASSERT_POSITION
+  
+  /* Expand both sides of the door.
+   * They must reach a solid tile at the same time on both sides.
+   * This is easy to mess up when designing, careful checking here really does matter.
+   * CHECK_CELL evaluates true if the door is finished, false to proceed, or returns if invalid.
+   */
+  #define CHECK_CELL(ax,ay,bx,by) ({ \
+    int _ax=(ax),_ay=(ay),_bx=(bx),_by=(by),result; \
+    if ( \
+      (_ax<0)||(_ax>=a->w)|| \
+      (_ay<0)||(_ay>=a->h)|| \
+      (_bx<0)||(_bx>=b->w)|| \
+      (_by<0)||(_by>=b->h) \
+    ) { \
+      fprintf(stderr,"Door between map:%d and map:%d extends past the edge.\n",a->rid,b->rid); \
+      return -1; \
+    } \
+    uint8_t aphysics=g.physics[a->v[_ay*a->w+_ax]]; \
+    uint8_t bphysics=g.physics[b->v[_by*b->w+_bx]]; \
+    if ((aphysics==NS_physics_solid)&&(bphysics==NS_physics_solid)) result=1; \
+    else result=0; \
+    (result); \
+  })
+  if ((adoor->edge==ZS_EDGE_N)||(adoor->edge==ZS_EDGE_S)) { // expand horizontally
+    for (;;) {
+      if (CHECK_CELL(adoor->p-1,ay,bdoor->p-1,by)) break;
+      adoor->p--;
+      bdoor->p--;
+      adoor->c++;
+      bdoor->c++;
+    }
+    for (;;) {
+      if (CHECK_CELL(adoor->p+adoor->c,ay,bdoor->p+bdoor->c,by)) break;
+      adoor->c++;
+      bdoor->c++;
+    }
+  } else { // expand vertically
+    for (;;) {
+      if (CHECK_CELL(ax,adoor->p-1,bx,bdoor->p-1)) break;
+      adoor->p--;
+      bdoor->p--;
+      adoor->c++;
+      bdoor->c++;
+    }
+    for (;;) {
+      if (CHECK_CELL(ax,adoor->p+adoor->c,bx,bdoor->p+bdoor->c)) break;
+      adoor->c++;
+      bdoor->c++;
+    }
+  }
+  #undef CHECK_CELL
+  
+  return 0;
+}
+ 
+static int zs_res_populate_doors() {
+  struct zs_map *map=g.mapv;
+  int mapi=g.mapc;
+  for (;mapi-->0;map++) {
+    struct rom_command_reader reader={.v=map->cmdv,.c=map->cmdc};
+    struct rom_command cmd;
+    while (rom_command_reader_next(&cmd,&reader)>0) {
+      if (cmd.opcode!=CMD_map_door) continue;
+      if (zs_res_add_door(map,&cmd)<0) return -1;
+    }
+  }
+  return 0;
+}
+
 /* Initialize client-side resource store.
  */
  
@@ -102,6 +265,8 @@ int zs_res_init() {
   if (egg_texture_load_image(g.texid_bg,g.bgimageid)<0) return -1;
   if (!g.texid_sprites&&((g.texid_sprites=egg_texture_new())<1)) return -1;
   if (egg_texture_load_image(g.texid_sprites,RID_image_sprites)<0) return -1;
+  
+  if (zs_res_populate_doors()<0) return -1;
   
   return 0;
 }

@@ -104,7 +104,8 @@ static void hero_update_wallgrab(struct sprite *sprite) {
   if (SPRITE->fastfall) return; // Oh Dot, make up your mind.
   if (SPRITE->injump&&(SPRITE->jump_power>HERO_WALLGRAB_JUMP_POWER_LIMIT)) return;
   double x=sprite->x+0.550*SPRITE->indx;
-  if (!physics_check_point(x,sprite->y)) return;
+  double y=sprite->y-0.333;
+  if (!physics_check_point(x,y)) return;
   SPRITE->wallgrab=1;
   sprite->terminal_velocity=HERO_WALLGRAB_VELOCITY;
 }

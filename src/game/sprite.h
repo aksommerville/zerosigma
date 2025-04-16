@@ -50,6 +50,11 @@ struct sprite_type {
 void sprite_del(struct sprite *sprite);
 struct sprite *sprite_new(const struct sprite_type *type); // Prefer sprite_spawn(), below.
 
+// These should only be used during scene transitions.
+void sprite_unlist(struct sprite *sprite);
+int sprite_relist(struct sprite *sprite);
+void sprites_drop();
+
 /* _cmd and _rid are only different in the coordinates format.
  * _type does not require a resource.
  */

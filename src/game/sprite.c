@@ -30,6 +30,42 @@ struct sprite *sprite_new(const struct sprite_type *type) {
   return sprite;
 }
 
+/* Shared list.
+ */
+ 
+void sprite_unlist(struct sprite *sprite) {
+  int i=g.spritec;
+  while (i-->0) {
+    if (g.spritev[i]==sprite) {
+      g.spritec--;
+      memmove(g.spritev+i,g.spritev+i+1,sizeof(void*)*(g.spritec-i));
+      return;
+    }
+  }
+}
+
+int sprite_relist(struct sprite *sprite) {
+  if (!sprite) return -1;
+  if (g.spritec>=g.spritea) {
+    int na=g.spritea+128;
+    if (na>INT_MAX/sizeof(void*)) return -1;
+    void *nv=realloc(g.spritev,sizeof(void*)*na);
+    if (!nv) return -1;
+    g.spritev=nv;
+    g.spritea=na;
+  }
+  g.spritev[g.spritec++]=sprite;
+  return 0;
+}
+
+void sprites_drop() {
+  while (g.spritec>0) {
+    g.spritec--;
+    struct sprite *sprite=g.spritev[g.spritec];
+    sprite_del(sprite);
+  }
+}
+
 /* Read and apply those commands get can generically.
  */
  
@@ -68,15 +104,10 @@ static struct sprite *sprite_spawn_finish(struct sprite *sprite) {
     sprite_del(sprite);
     return 0;
   }
-  if (g.spritec>=g.spritea) {
-    int na=g.spritea+128;
-    if (na>INT_MAX/sizeof(void*)) { sprite_del(sprite); return 0; }
-    void *nv=realloc(g.spritev,sizeof(void*)*na);
-    if (!nv) { sprite_del(sprite); return 0; }
-    g.spritev=nv;
-    g.spritea=na;
+  if (sprite_relist(sprite)<0) {
+    sprite_del(sprite);
+    return 0;
   }
-  g.spritev[g.spritec++]=sprite;
   return sprite;
 }
 

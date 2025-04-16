@@ -15,10 +15,15 @@ static int physics_resolve_gravity_collisions(struct sprite *sprite) {
   double pvy=sprite->pvy+sprite->phb;
   double y=sprite->y+sprite->phb;
   int row=(int)y;
+  if (row<0) row=0;
+  else if (row>=g.scene.map->h) row=g.scene.map->h-1;
   double frow=(double)row;
   if ((pvy<=frow)&&(y>frow)) {
-    int cola=(int)(sprite->x+sprite->phl+SPACE_FUDGE); if (cola<0) cola=0;
-    int colz=(int)(sprite->x+sprite->phr-SPACE_FUDGE); if (colz>=g.scene.map->w) colz=g.scene.map->w-1;
+    int cola=(int)(sprite->x+sprite->phl+SPACE_FUDGE);
+    int colz=(int)(sprite->x+sprite->phr-SPACE_FUDGE);
+    // Clamp each on both sides. That's important, to implicitly extend the last valid cell.
+    if (cola<0) cola=0; else if (cola>=g.scene.map->w) cola=g.scene.map->w-1;
+    if (colz<0) colz=0; else if (colz>=g.scene.map->w) colz=g.scene.map->w-1;
     const uint8_t *cell=g.scene.map->v+row*g.scene.map->w+cola;
     int col=cola; for (;col<=colz;col++,cell++) {
       uint8_t physics=g.physics[*cell];
@@ -61,13 +66,17 @@ static void physics_resolve_map() {
   while (i-->0) {
     struct sprite *sprite=g.spritev[i];
     if (!sprite->physics_mask) continue;
-    int cola=(int)(sprite->x+sprite->phl); if (cola<0) cola=0;
-    int colz=(int)(sprite->x+sprite->phr); if (colz>=g.scene.map->w) colz=g.scene.map->w-1;
-    int rowa=(int)(sprite->y+sprite->pht); if (rowa<0) rowa=0;
-    int rowz=(int)(sprite->y+sprite->phb); if (rowz>=g.scene.map->h) rowz=g.scene.map->h-1;
-    if ((cola>colz)||(rowa>rowz)) continue; // Totally possible, for sprites entirely off-screen.
+    int cola=(int)(sprite->x+sprite->phl);
+    int colz=(int)(sprite->x+sprite->phr);
+    int rowa=(int)(sprite->y+sprite->pht);
+    int rowz=(int)(sprite->y+sprite->phb);
+    if (cola<0) cola=0; else if (cola>=g.scene.map->w) cola=g.scene.map->w-1;
+    if (colz<0) colz=0; else if (colz>=g.scene.map->w) colz=g.scene.map->w-1;
+    if (rowa<0) rowa=0; else if (rowa>=g.scene.map->h) rowa=g.scene.map->h-1;
+    if (rowz<0) rowz=0; else if (rowz>=g.scene.map->h) rowz=g.scene.map->h-1;
     
     // Move in the direction implied by (pvx,pvy). This is important, to avoid stubbing toes.
+    // Maybe swap (a,z), then advance (z) so we can treat it as exclusive.
     int dcol,drow;
     if (sprite->pvx<=sprite->x) {
       dcol=1;
@@ -96,7 +105,10 @@ static void physics_resolve_map() {
       int col=cola; for (;col!=colz;col+=dcol,cell+=dcol) {
         uint8_t physics=g.physics[*cell];
         if (!(sprite->physics_mask&(1<<physics))) continue;
-        physics_escape_box(sprite,col,row,col+1.0,row+1.0);
+        double l=col,t=row,r=col+1.0,b=row+1.0;
+        if (!col) l=-999.0; else if (col>=g.scene.map->w-1) r=999.0;
+        if (!row) t=-999.0; else if (row>=g.scene.map->h-1) b=999.0;
+        physics_escape_box(sprite,l,t,r,b);
       }
     }
   }
@@ -126,6 +138,11 @@ static void physics_assign_pv() {
  */
  
 static void physics_apply_gravity(double elapsed) {
+
+  // As a safety measure against infinite holes, stop applying gravity to sprites two meters below the world's bottom.
+  // If you fall into a hole where there isn't a door, you can jump out of it.
+  double absolute_floor=g.scene.map->h+2.0;
+
   int i=g.spritec;
   while (i-->0) {
     struct sprite *sprite=g.spritev[i];
@@ -142,7 +159,7 @@ static void physics_apply_gravity(double elapsed) {
     sprite->gravclock+=elapsed;
     sprite->y+=sprite->gravity*elapsed;
     
-    if (physics_resolve_gravity_collisions(sprite)) {
+    if (physics_resolve_gravity_collisions(sprite)||(sprite->y>=absolute_floor)) {
       if (sprite->graviting) {
         sprite->graviting=0;
         sprite->pvy=sprite->y;
@@ -186,6 +203,7 @@ int physics_downjump(struct sprite *sprite) {
   if (fract>=0.999) whole+=1.0;
   else if (fract>0.001) return 0;
   int row=(int)whole;
+  if (row<0) return 0;
   if (row>=g.scene.map->h) return 0;
   
   // Each cell under the sprite, on that row, must have physics vacant or oneway. OOB is ok.
@@ -215,9 +233,11 @@ int physics_downjump(struct sprite *sprite) {
  
 int physics_check_point(double x,double y) {
   int col=(int)x;
-  if ((col<0)||(col>=g.scene.map->w)) return 0;
+  if (col<0) col=0;
+  else if (col>=g.scene.map->w) col=g.scene.map->w-1;
   int row=(int)y;
-  if ((row<0)||(row>=g.scene.map->h)) return 0;
+  if (row<0) row=0;
+  else if (row>=g.scene.map->h) row=g.scene.map->h-1;
   uint8_t cell=g.scene.map->v[row*g.scene.map->w+col];
   uint8_t physics=g.physics[cell];
   switch (physics) {

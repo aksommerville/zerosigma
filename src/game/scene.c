@@ -14,17 +14,11 @@ static int scene_apply_map_commands() {
           uint8_t row=cmd.argv[1];
           uint16_t rid=(cmd.argv[2]<<8)|cmd.argv[3];
           uint32_t arg=(cmd.argv[4]<<24)|(cmd.argv[5]<<16)|(cmd.argv[6]<<8)|cmd.argv[7];
+          if (rid==RID_sprite_hero) {
+            // The hero sprite is special. Only spawn if it we don't already have one.
+            if (scene_get_hero()) break;
+          }
           if (!sprite_spawn_cmd(col,row,rid,arg)) return -1;
-        } break;
-        
-      case CMD_map_door: {
-          uint8_t col=cmd.argv[0];
-          uint8_t row=cmd.argv[1];
-          uint16_t mapid=(cmd.argv[2]<<8)|cmd.argv[3];
-          uint8_t dstcol=cmd.argv[4];
-          uint8_t dstrow=cmd.argv[5];
-          uint16_t flags=(cmd.argv[6]<<8)|cmd.argv[7];
-          fprintf(stderr,"TODO: Record door at (%d,%d) to map:%d at (%d,%d) flags=0x%04x\n",col,row,mapid,dstcol,dstrow,flags);
         } break;
     
     }
@@ -36,7 +30,12 @@ static int scene_apply_map_commands() {
  */
  
 static int scene_load_map(int rid) {
-  //TODO Drop sprites. Keep the hero, maybe some others?
+
+  struct sprite *hero=scene_get_hero();
+  if (hero) sprite_unlist(hero);
+  sprites_drop();
+  if (hero&&(sprite_relist(hero)<0)) return -1;
+  
   if (!(g.scene.map=zs_map_get(rid))) {
     fprintf(stderr,"map:%d not found\n",rid);
     return -1;
@@ -92,6 +91,42 @@ void scene_button_up(int btnid) {
   hero_button_up(scene_get_hero(),btnid);
 }
 
+/* If the hero is OOB, locate the relevant door and pass thru it.
+ * We'll poll this every cycle.
+ */
+ 
+static void scene_check_doors_1(int edge,int loc,struct sprite *hero) {
+  const struct zs_door *door=g.scene.map->doorv;
+  int i=g.scene.map->doorc;
+  for (;i-->0;door++) {
+    if (door->edge!=edge) continue;
+    if ((loc<door->p)||(loc>=door->p+door->c)) continue;
+    struct zs_map *nmap=zs_map_get(door->mapid);
+    if (nmap) switch (edge) {
+      case ZS_EDGE_W: hero->y+=door->d; hero->x+=nmap->w; break;
+      case ZS_EDGE_E: hero->y+=door->d; hero->x-=g.scene.map->w; break;
+      case ZS_EDGE_N: hero->x+=door->d; hero->y+=nmap->h; break;
+      case ZS_EDGE_S: hero->x+=door->d; hero->y-=g.scene.map->h; break;
+    }
+    scene_load_map(door->mapid);
+    g.scene.door_blackout=0.500;
+    return;
+  }
+}
+ 
+static void scene_check_doors(double elapsed) {
+  if (g.scene.door_blackout>0.0) {
+    g.scene.door_blackout-=elapsed;
+    return;
+  }
+  struct sprite *hero=scene_get_hero();
+  if (!hero) return;
+  if (hero->x<0.0) scene_check_doors_1(ZS_EDGE_W,(int)hero->y,hero);
+  else if (hero->x>=g.scene.map->w) scene_check_doors_1(ZS_EDGE_E,(int)hero->y,hero);
+  else if (hero->y<0.0) scene_check_doors_1(ZS_EDGE_N,(int)hero->x,hero);
+  else if (hero->y>=g.scene.map->h) scene_check_doors_1(ZS_EDGE_S,(int)hero->x,hero);
+}
+
 /* Update.
  */
  
@@ -99,6 +134,7 @@ void scene_update(double elapsed) {
   scene_update_sprites(elapsed);
   reap_defunct_sprites();
   physics_update(elapsed);
+  scene_check_doors(elapsed);
   //TODO Terminal conditions.
 }
 

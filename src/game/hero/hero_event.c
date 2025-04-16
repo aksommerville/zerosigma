@@ -74,6 +74,7 @@ static void hero_indy_changed(struct sprite *sprite) {
   if ((SPRITE->indy>0)&&SPRITE->injump&&(SPRITE->jump_power>0.0)) {
     SPRITE->jump_power=0.0;
     sprite->suspend_gravity=0;
+    SPRITE->walljump=0;
     SPRITE->fastfall=1;
     SPRITE->fastfall_clock=0.0;
     sprite->gravity=sprite->terminal_velocity=HERO_FASTFALL_VELOCITY;
@@ -82,6 +83,7 @@ static void hero_indy_changed(struct sprite *sprite) {
 
   if (sprite->graviting) {
     if (SPRITE->indy>0) {
+      SPRITE->walljump=0;
       SPRITE->fastfall=1;
       SPRITE->fastfall_clock=0.0;
       sprite->gravity=sprite->terminal_velocity=HERO_FASTFALL_VELOCITY;
@@ -144,8 +146,9 @@ static void hero_jump_begin(struct sprite *sprite) {
    */
   if (sprite->suspend_gravity||(sprite->gravclock>0.0)) {
     const double radius=0.600;
-    int l=physics_check_point(sprite->x-radius,sprite->y);
-    int r=physics_check_point(sprite->x+radius,sprite->y);
+    double y=sprite->y-0.333;
+    int l=physics_check_point(sprite->x-radius,y);
+    int r=physics_check_point(sprite->x+radius,y);
     if (l&&r) {
       hero_walljump(sprite,0.0);
       return;

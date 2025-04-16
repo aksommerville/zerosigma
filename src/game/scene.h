@@ -10,6 +10,7 @@
 struct scene {
   struct zs_map *map;
   int scrollx,scrolly; // Top left of view in map pixels, updated at the start of each render.
+  double door_blackout;
 };
 
 int scene_reset();
