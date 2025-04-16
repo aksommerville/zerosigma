@@ -8,7 +8,7 @@
 #define PHYSICS_H
 
 #define DEFAULT_TERMINAL_VELOCITY 17.0 /* m/s */
-#define GRAVITY_ACCELERATION 20.0 /* m/s**2 */
+#define GRAVITY_ACCELERATION 30.0 /* m/s**2 */
 #define GRAVITY_START -0.125 /* m/s. <0 to create coyote time; effective gravity clamps to zero. */
 
 void physics_update(double elapsed);

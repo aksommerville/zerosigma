@@ -56,7 +56,7 @@ Gather flowers of various colors and get scored based on count and color balance
 - [ ] Platforming.
 - - [x] Down jump
 - - [x] Wall jump
-- - [ ] Fast fall
+- - [x] Fast fall
 - [ ] Map loader and connections. Use the regular door command for edge doors too.
 - [ ] Collect flowers.
 - [ ] Episodes.

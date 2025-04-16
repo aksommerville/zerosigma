@@ -8,6 +8,15 @@ void hero_fall_begin(struct sprite *sprite) {
 
 void hero_fall_end(struct sprite *sprite,double pressure) {
   SPRITE->jump_power=HERO_JUMP_POWER_DEFAULT;
+  
+  if (SPRITE->fastfall) {
+    SPRITE->fastfall=0;
+    sprite->terminal_velocity=DEFAULT_TERMINAL_VELOCITY;
+    SPRITE->sorefoot=0.500;
+    egg_play_sound(RID_sound_thump_fastfall;
+    return;
+  }
+  
   if (pressure>=1.500) { // >=16m
     egg_play_sound(RID_sound_thump_huge);
     //TODO Stun Dot briefly
@@ -59,6 +68,32 @@ static void hero_indx_changed(struct sprite *sprite) {
  */
  
 static void hero_indy_changed(struct sprite *sprite) {
+
+  if ((SPRITE->indy>0)&&SPRITE->injump&&(SPRITE->jump_power>0.0)) {
+    SPRITE->jump_power=0.0;
+    sprite->suspend_gravity=0;
+    SPRITE->fastfall=1;
+    SPRITE->fastfall_clock=0.0;
+    sprite->gravity=sprite->terminal_velocity=HERO_FASTFALL_VELOCITY;
+    return;
+  }
+
+  if (sprite->graviting) {
+    if (SPRITE->indy>0) {
+      SPRITE->fastfall=1;
+      SPRITE->fastfall_clock=0.0;
+      sprite->gravity=sprite->terminal_velocity=HERO_FASTFALL_VELOCITY;
+    } else if (SPRITE->fastfall) {
+      SPRITE->fastfall=0;
+      sprite->gravity=sprite->terminal_velocity=DEFAULT_TERMINAL_VELOCITY;
+    }
+    return;
+  }
+  if (SPRITE->fastfall) {
+    SPRITE->fastfall=0;
+    sprite->terminal_velocity=DEFAULT_TERMINAL_VELOCITY;
+  }
+
   //TODO Ladders.
   //TODO Duck.
 }
@@ -90,6 +125,8 @@ static void hero_walljump(struct sprite *sprite,double dx) {
  */
  
 static void hero_jump_begin(struct sprite *sprite) {
+
+  if (SPRITE->sorefoot>0.0) return;
 
   /* Check wall jump, if I'm not footed. This does not require jump_power.
    * Examine a single point (well, two), just a little beyond my horizontal edges, at my vertical center.

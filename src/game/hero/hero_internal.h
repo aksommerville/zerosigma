@@ -12,6 +12,7 @@
 #define HERO_WALLJUMPX_DECELERATION 100.0 /* m/s**2 */
 #define HERO_WALLJUMPY_DECELERATION 100.0 /* m/s**2 */
 #define HERO_WALLJUMP_SUSPENDX 0.500 /* s */
+#define HERO_FASTFALL_VELOCITY 28.0 /* m/s */
 
 struct sprite_hero {
   struct sprite hdr;
@@ -25,6 +26,9 @@ struct sprite_hero {
   double walljump_xpower;
   double walljump_ypower;
   double suspendx;
+  int fastfall;
+  double fastfall_clock;
+  double sorefoot; // Counts down while hurt.
 };
 
 #define SPRITE ((struct sprite_hero*)sprite)
