@@ -100,8 +100,8 @@ static void hero_update_wallgrab(struct sprite *sprite) {
     sprite->terminal_velocity=DEFAULT_TERMINAL_VELOCITY;
   }
   if (!SPRITE->indx) return; // Only grabbing while actively pressing the wall.
-  if (SPRITE->seated) return;
-  //if (!sprite->graviting&&!sprite->suspend_gravity) return; // Must be aerial, either jumping or falling.
+  if (SPRITE->seated) return; // Must be aerial, either jumping or falling.
+  if (SPRITE->fastfall) return; // Oh Dot, make up your mind.
   if (SPRITE->injump&&(SPRITE->jump_power>HERO_WALLGRAB_JUMP_POWER_LIMIT)) return;
   double x=sprite->x+0.550*SPRITE->indx;
   if (!physics_check_point(x,sprite->y)) return;
