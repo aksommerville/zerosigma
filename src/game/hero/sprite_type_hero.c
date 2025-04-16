@@ -13,6 +13,7 @@ static int _hero_init(struct sprite *sprite) {
   sprite->physics_mask=(1<<NS_physics_solid);
   sprite->pht=-1.125;
   SPRITE->jump_power=HERO_JUMP_POWER_DEFAULT;
+  SPRITE->seated=1;
   return 0;
 }
 
@@ -89,6 +90,25 @@ static void hero_update_jump(struct sprite *sprite,double elapsed) {
   sprite->y-=SPRITE->jump_power*elapsed;
 }
 
+/* Check wallgrab.
+ * To reduce the complexity of checking state changes, I'm polling for this every frame.
+ */
+ 
+static void hero_update_wallgrab(struct sprite *sprite) {
+  if (SPRITE->wallgrab) {
+    SPRITE->wallgrab=0;
+    sprite->terminal_velocity=DEFAULT_TERMINAL_VELOCITY;
+  }
+  if (!SPRITE->indx) return; // Only grabbing while actively pressing the wall.
+  if (SPRITE->seated) return;
+  //if (!sprite->graviting&&!sprite->suspend_gravity) return; // Must be aerial, either jumping or falling.
+  if (SPRITE->injump&&(SPRITE->jump_power>HERO_WALLGRAB_JUMP_POWER_LIMIT)) return;
+  double x=sprite->x+0.550*SPRITE->indx;
+  if (!physics_check_point(x,sprite->y)) return;
+  SPRITE->wallgrab=1;
+  sprite->terminal_velocity=HERO_WALLGRAB_VELOCITY;
+}
+
 /* Update.
  */
  
@@ -112,6 +132,8 @@ static void _hero_update(struct sprite *sprite,double elapsed) {
       SPRITE->sorefoot=0.0;
     }
   }
+  
+  hero_update_wallgrab(sprite);
 }
 
 /* Render.
@@ -127,6 +149,10 @@ static void _hero_render(struct sprite *sprite,int x,int y) {
     col=7;
   } else if (SPRITE->fastfall) {
     col=(SPRITE->animframe&1)?5:6;
+  } else if (SPRITE->wallgrab) {
+    col=9;
+  } else if (SPRITE->walljump) {
+    col=10;
   } else {
     switch (SPRITE->animframe) {
       case 0: break;

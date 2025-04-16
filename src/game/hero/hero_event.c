@@ -4,16 +4,18 @@
  */
  
 void hero_fall_begin(struct sprite *sprite) {
+  SPRITE->seated=0;
 }
 
 void hero_fall_end(struct sprite *sprite,double pressure) {
+  SPRITE->seated=1;
   SPRITE->jump_power=HERO_JUMP_POWER_DEFAULT;
   
   if (SPRITE->fastfall) {
     SPRITE->fastfall=0;
     sprite->terminal_velocity=DEFAULT_TERMINAL_VELOCITY;
     SPRITE->sorefoot=0.500;
-    egg_play_sound(RID_sound_thump_fastfall;
+    egg_play_sound(RID_sound_thump_fastfall);
     return;
   }
   
@@ -104,6 +106,7 @@ static void hero_indy_changed(struct sprite *sprite) {
 static void hero_downjump(struct sprite *sprite) {
   if (physics_downjump(sprite)) {
     egg_play_sound(RID_sound_downjump);
+    SPRITE->seated=0;
   } else {
     egg_play_sound(RID_sound_reject);
   }
@@ -119,6 +122,11 @@ static void hero_walljump(struct sprite *sprite,double dx) {
   SPRITE->walljump_xpower=dx*HERO_WALLJUMPX_INITIAL;
   SPRITE->walljump_ypower=HERO_WALLJUMPY_INITIAL;
   SPRITE->suspendx=HERO_WALLJUMP_SUSPENDX;
+  if (dx<0.0) {
+    sprite->xform=0;
+  } else {
+    sprite->xform=EGG_XFORM_XREV;
+  }
 }
 
 /* Jump input.
@@ -158,6 +166,7 @@ static void hero_jump_begin(struct sprite *sprite) {
     SPRITE->jump_power=HERO_JUMP_POWER_DEFAULT;
   } else {
     sprite->suspend_gravity=1;
+    SPRITE->seated=0;
     egg_play_sound(RID_sound_jump);
   }
 }
