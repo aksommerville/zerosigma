@@ -13,9 +13,11 @@ void hero_fall_end(struct sprite *sprite,double pressure) {
   
   if (SPRITE->fastfall) {
     SPRITE->fastfall=0;
+    SPRITE->echo_record=0;
     sprite->terminal_velocity=DEFAULT_TERMINAL_VELOCITY;
     SPRITE->sorefoot=0.500;
     egg_play_sound(RID_sound_thump_fastfall);
+    scene_begin_earthquake();
     return;
   }
   
@@ -81,16 +83,21 @@ static int hero_check_ladder(struct sprite *sprite) {
   if ((col<0)||(row<0)||(col>=g.scene.map->w)||(row>=g.scene.map->h)) return 0;
   uint8_t physics=g.physics[g.scene.map->v[row*g.scene.map->w+col]];
   if (physics!=NS_physics_ladder) {
+    // No ladder at my center, but am I standing on one?
     if ((SPRITE->indy>0)&&(row<g.scene.map->h-1)&&(g.physics[g.scene.map->v[(row+1)*g.scene.map->w+col]]==NS_physics_ladder)) {
       sprite->y+=0.75;
       // and proceed
     } else {
       return 0;
     }
+  } else if (SPRITE->seated&&(SPRITE->indy>0)) {
+    // Ladder here but I'm on the ground and they said "down". Don't do it.
+    return 0;
   }
   sprite->x=SPRITE->ladderx=col+0.5;
   sprite->suspend_gravity=1;
   SPRITE->fastfall=0;
+  SPRITE->echo_record=0;
   SPRITE->wallgrab=0;
   SPRITE->seated=0;
   SPRITE->suspendx=0.0;
@@ -117,6 +124,7 @@ static void hero_indy_changed(struct sprite *sprite) {
     SPRITE->walljump=0;
     SPRITE->fastfall=1;
     SPRITE->fastfall_clock=0.0;
+    SPRITE->echo_record=999;
     sprite->gravity=sprite->terminal_velocity=HERO_FASTFALL_VELOCITY;
     return;
   }
@@ -126,6 +134,7 @@ static void hero_indy_changed(struct sprite *sprite) {
       SPRITE->walljump=0;
       SPRITE->fastfall=1;
       SPRITE->fastfall_clock=0.0;
+      SPRITE->echo_record=999;
       sprite->gravity=sprite->terminal_velocity=HERO_FASTFALL_VELOCITY;
     } else if (SPRITE->fastfall) {
       SPRITE->fastfall=0;
@@ -135,10 +144,10 @@ static void hero_indy_changed(struct sprite *sprite) {
   }
   if (SPRITE->fastfall) {
     SPRITE->fastfall=0;
+    SPRITE->echo_record=0;
     sprite->terminal_velocity=DEFAULT_TERMINAL_VELOCITY;
   }
 
-  //TODO Ladders.
   //TODO Duck.
 }
 
@@ -169,6 +178,7 @@ static void hero_walljump(struct sprite *sprite,double dx) {
   } else {
     sprite->xform=EGG_XFORM_XREV;
   }
+  hero_begin_echo(sprite,10);
 }
 
 /* Jump input.
@@ -220,6 +230,7 @@ static void hero_jump_begin(struct sprite *sprite) {
     sprite->suspend_gravity=1;
     SPRITE->seated=0;
     egg_play_sound(RID_sound_jump);
+    hero_begin_echo(sprite,5);
   }
 }
 

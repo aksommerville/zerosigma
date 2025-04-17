@@ -11,6 +11,7 @@ struct scene {
   struct zs_map *map;
   int scrollx,scrolly; // Top left of view in map pixels, updated at the start of each render.
   double door_blackout;
+  double earthquake;
 };
 
 int scene_reset();
@@ -22,5 +23,7 @@ void scene_update(double elapsed);
 void scene_render();
 
 struct sprite *scene_get_hero();
+
+void scene_begin_earthquake();
 
 #endif

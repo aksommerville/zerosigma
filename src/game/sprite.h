@@ -42,6 +42,9 @@ struct sprite_type {
   // Physics notifications.
   void (*fall_begin)(struct sprite *sprite);
   void (*fall_end)(struct sprite *sprite,double duration); // (duration) in seconds
+  
+  // Only relevant to the hero. Other sprites don't survive transitions.
+  void (*map_changed)(struct sprite *sprite);
 };
 
 /* Plain sprite_new() DOES NOT call (type->init).

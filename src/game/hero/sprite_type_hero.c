@@ -6,6 +6,13 @@
 static void _hero_del(struct sprite *sprite) {
 }
 
+/* Zap history.
+ */
+ 
+static void hero_history_zap(struct sprite *sprite) {
+  SPRITE->echoc=0;
+}
+
 /* Init.
  */
  
@@ -14,6 +21,7 @@ static int _hero_init(struct sprite *sprite) {
   sprite->pht=-1.125;
   SPRITE->jump_power=HERO_JUMP_POWER_DEFAULT;
   SPRITE->seated=1;
+  hero_history_zap(sprite);
   return 0;
 }
 
@@ -120,6 +128,7 @@ static void hero_update_wallgrab(struct sprite *sprite) {
   double y=sprite->y-0.333;
   if (!physics_check_point(x,y)) return;
   SPRITE->wallgrab=1;
+  SPRITE->echo_record=0;
   sprite->terminal_velocity=HERO_WALLGRAB_VELOCITY;
 }
 
@@ -139,6 +148,7 @@ static void hero_update_ladder(struct sprite *sprite,double elapsed) {
       SPRITE->animframe=0;
       sprite->suspend_gravity=0;
       sprite->gravity=0.0;
+      SPRITE->seated=1;
       SPRITE->jump_power=HERO_JUMP_POWER_DEFAULT;
       if (SPRITE->indy>0) {
         sprite->y=row-0.5;
@@ -187,6 +197,32 @@ static void _hero_update(struct sprite *sprite,double elapsed) {
  
 static void _hero_render(struct sprite *sprite,int x,int y) {
 
+  /* If we have an echo, render and advance it.
+   */
+  if (SPRITE->echoc>0) {
+    graf_set_tint(&g.graf,0xffffffff);
+    int p=SPRITE->echop,i=SPRITE->echoc;
+    while (i-->0) {
+      struct hero_echo *echo=SPRITE->echov+p;
+      if (--(echo->ttl)<=0) {
+        if (p==SPRITE->echop) {
+          SPRITE->echoc--;
+          if (++(SPRITE->echop)>=HERO_ECHO_LIMIT) SPRITE->echop=0;
+        }
+        if (++p>=HERO_ECHO_LIMIT) p=0;
+        continue;
+      }
+      if (++p>=HERO_ECHO_LIMIT) p=0;
+      graf_set_alpha(&g.graf,echo->ttl*4);
+      int ex=(int)(echo->x*NS_sys_tilesize)-g.scene.scrollx;
+      int ey=(int)(echo->y*NS_sys_tilesize)-g.scene.scrolly;
+      graf_draw_tile(&g.graf,g.texid_sprites,ex,ey-NS_sys_tilesize,echo->tileid,echo->xform);
+      graf_draw_tile(&g.graf,g.texid_sprites,ex,ey,echo->tileid,echo->xform);
+    }
+    graf_set_tint(&g.graf,0);
+    graf_set_alpha(&g.graf,0xff);
+  }
+
   /* Main body is always two tiles, in the same column.
    */
   uint8_t col=0;
@@ -219,6 +255,22 @@ static void _hero_render(struct sprite *sprite,int x,int y) {
   }
   graf_draw_tile(&g.graf,g.texid_sprites,x,y-NS_sys_tilesize,0x00+col,sprite->xform);
   graf_draw_tile(&g.graf,g.texid_sprites,x,y,0x10+col,sprite->xform);
+  
+  /* If we're recording echoes, do that.
+   */
+  if (SPRITE->echo_record>0) {
+    SPRITE->echo_record--;
+    int p=SPRITE->echop+SPRITE->echoc;
+    if (p>=HERO_ECHO_LIMIT) p-=HERO_ECHO_LIMIT;
+    struct hero_echo *echo=SPRITE->echov+p;
+    if (SPRITE->echoc<HERO_ECHO_LIMIT) SPRITE->echoc++;
+    else SPRITE->echop++;
+    echo->x=sprite->x;
+    echo->y=sprite->y;
+    echo->tileid=col;
+    echo->xform=sprite->xform;
+    echo->ttl=15; // limit 63
+  }
   
   /* When foot sore, draw a red outline fading out.
    */
@@ -256,4 +308,12 @@ const struct sprite_type sprite_type_hero={
   .render=_hero_render,
   .fall_begin=hero_fall_begin,
   .fall_end=hero_fall_end,
+  .map_changed=hero_history_zap,
 };
+
+/* Begin echo.
+ */
+ 
+void hero_begin_echo(struct sprite *sprite,int framec) {
+  SPRITE->echo_record=framec;
+}

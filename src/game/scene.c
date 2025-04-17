@@ -110,6 +110,7 @@ static void scene_check_doors_1(int edge,int loc,struct sprite *hero) {
     }
     scene_load_map(door->mapid);
     g.scene.door_blackout=0.500;
+    if (hero&&hero->type->map_changed) hero->type->map_changed(hero);
     return;
   }
 }
@@ -131,6 +132,9 @@ static void scene_check_doors(double elapsed) {
  */
  
 void scene_update(double elapsed) {
+  if ((g.scene.earthquake-=elapsed)<=0.0) {
+    g.scene.earthquake=0.0;
+  }
   scene_update_sprites(elapsed);
   reap_defunct_sprites();
   physics_update(elapsed);
@@ -162,14 +166,33 @@ static void scene_calculate_scroll() {
     if (g.scene.scrolly<0) g.scene.scrolly=0;
     else if (g.scene.scrolly>worldh-FBH) g.scene.scrolly=worldh-FBH;
   }
+  if (g.scene.earthquake>0.0) {
+    int p=(int)(g.scene.earthquake*22.0)&7;
+    switch (p) {
+      case 0: g.scene.scrolly+=1; break;
+      case 1: g.scene.scrolly+=0; break;
+      case 2: g.scene.scrolly-=1; break;
+      case 3: g.scene.scrolly-=2; break;
+      case 4: g.scene.scrolly-=1; break;
+      case 5: g.scene.scrolly-=0; break;
+      case 6: g.scene.scrolly+=1; break;
+      case 7: g.scene.scrolly+=2; break;
+    }
+    //if (g.scene.scrolly<0) g.scene.scrolly=0;
+    //else if (g.scene.scrolly>worldh-FBH) g.scene.scrolly=worldh-FBH;
+  }
 }
 
 /* Render sky, and if warranted, blotter.
  */
  
 static void scene_render_bg() {
-  //TODO Check OOB
   graf_draw_rect(&g.graf,0,0,FBW,FBH,0xa0c0e0ff);
+  if (g.scene.scrollx<0) graf_draw_rect(&g.graf,0,0,-g.scene.scrollx,FBH,0x000000ff);
+  if (g.scene.scrolly<0) graf_draw_rect(&g.graf,0,0,FBW,-g.scene.scrolly,0x000000ff);
+  int over;
+  if ((over=g.scene.scrollx+FBW-g.scene.map->w*NS_sys_tilesize)>0) graf_draw_rect(&g.graf,FBW-over,0,over,FBH,0x000000ff);
+  if ((over=g.scene.scrolly+FBH-g.scene.map->h*NS_sys_tilesize)>0) graf_draw_rect(&g.graf,0,FBH-over,FBW,over,0x000000ff);
 }
 
 /* Render map.
@@ -245,4 +268,11 @@ struct sprite *scene_get_hero() {
     if (sprite->type==&sprite_type_hero) return sprite;
   }
   return 0;
+}
+
+/* Begin earthquake.
+ */
+ 
+void scene_begin_earthquake() {
+  g.scene.earthquake=1.000;
 }

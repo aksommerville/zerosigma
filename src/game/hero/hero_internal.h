@@ -16,6 +16,7 @@
 #define HERO_FASTFALL_VELOCITY 28.0 /* m/s */
 #define HERO_WALLGRAB_VELOCITY 4.0 /* m/s */
 #define HERO_LADDER_CLIMB_SPEED 4.0 /* m/s */
+#define HERO_ECHO_LIMIT 60
 
 struct sprite_hero {
   struct sprite hdr;
@@ -35,11 +36,21 @@ struct sprite_hero {
   int wallgrab;
   int seated;
   double ladderx; // >0.0, center of ladder column, if we're climbing.
+  
+  struct hero_echo {
+    double x,y;
+    uint8_t tileid,xform; // (tileid) is the top tile, we also draw +0x10.
+    int ttl;
+  } echov[HERO_ECHO_LIMIT];
+  int echop,echoc;
+  int echo_record; // Counts down while recording.
 };
 
 #define SPRITE ((struct sprite_hero*)sprite)
 
 void hero_fall_begin(struct sprite *sprite);
 void hero_fall_end(struct sprite *sprite,double duration);
+
+void hero_begin_echo(struct sprite *sprite,int framec);
 
 #endif
