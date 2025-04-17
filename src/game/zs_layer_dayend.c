@@ -157,6 +157,12 @@ struct zs_layer *zs_layer_spawn_dayend() {
   // Calculate the bouquet's score.
   score_summary(summary);
   
+  if (summary->score) {
+    egg_play_song(RID_song_flowers_for_you_positive,0,0);
+  } else {
+    egg_play_song(RID_song_flowers_for_you_negative,0,0);
+  }
+  
   //XXX TEMP place some labels. We'll replace this soon with juicy counters and an animated sequence showing the bouquet being accepted or rejected.
   dayend_add_label_text(layer,"END OF DAY",-1);
   dayend_add_label_int(layer,summary->score);

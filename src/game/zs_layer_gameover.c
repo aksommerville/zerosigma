@@ -111,5 +111,7 @@ struct zs_layer *zs_layer_spawn_gameover() {
     y+=label->h;
   }
   
+  egg_play_song(RID_song_cosmic_balance,0,1);
+  
   return layer;
 }

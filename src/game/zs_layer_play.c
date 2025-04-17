@@ -34,7 +34,7 @@ static void _play_update(struct zs_layer *layer,double elapsed,int input,int pvi
  
 static void _play_focus(struct zs_layer *layer,int focus) {
   if (focus) {
-    egg_play_song(RID_song_petal_to_the_metal,0,1);//XXX TEMP
+    egg_play_song(RID_song_petal_to_the_metal,0,1);
   } else {
     if (LAYER->pvinput) {
       int bit=0x4000;

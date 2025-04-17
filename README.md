@@ -37,7 +37,7 @@ Gather flowers of various colors and get scored based on count and color balance
   M 2025-04-14: Jump, downjump, walljump. Gravity and basic motions feel ok. Sketch of background music (petal_to_the_metal).
   T 2025-04-15: Music refined, home map cleaned up, fastfall, wallgrab.
   W 2025-04-16: Map connections, ladders, earthquake, echo. Grow flowers.
-  R 2025-04-17
+  R 2025-04-17: Scorekeeping, customers. More music.
   F 2025-04-18
   S 2025-04-19
   U 2025-04-20
@@ -61,10 +61,11 @@ Gather flowers of various colors and get scored based on count and color balance
 - [x] Collect flowers.
 - [x] Episodes.
 - [x] Scoring.
-- [ ] Hazards.
+- [ ] Hazards. Nothing actually harmful, I don't want HP or even die-and-respawn. But things that knock you back, paralyze you...
 - [ ] Proper maps.
 - [ ] Sound effects.
 - [ ] Menus.
 - - [ ] Hello
 - - [ ] Game over
 - - [ ] Deliver
+- [ ] Achievements, persistence.
