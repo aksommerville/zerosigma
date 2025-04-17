@@ -44,6 +44,11 @@ struct sprite_hero {
   } echov[HERO_ECHO_LIMIT];
   int echop,echoc;
   int echo_record; // Counts down while recording.
+  
+  /* Present if there's a flower we can pick right now.
+   * This points weakly into g.session.flowerv.
+   */
+  struct session_flower *flower;
 };
 
 #define SPRITE ((struct sprite_hero*)sprite)

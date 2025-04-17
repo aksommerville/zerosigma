@@ -7,18 +7,23 @@
  */
  
 // Keep all channels in 0x10..0xf0: We randomly add or subtract up to 15 from each channel.
-static const struct color {
-  uint8_t r,g,b;
-} colorv[]={
+const struct color colorv[COLORC]={
   {0xf0,0x10,0x10}, // red
   {0x60,0x80,0xf0}, // blue
   {0xf0,0xa0,0xb0}, // pink
   {0xf0,0xf0,0x20}, // yellow
   {0xa0,0x20,0xf0}, // purple
 };
+
+const uint32_t display_colorv[COLORC]={
+  0xf01010ff,
+  0x6080f0ff,
+  0xf0a0b0ff,
+  0xf0f020ff,
+  0xc060f0ff,
+};
  
-static uint32_t session_next_flower_tint() {
-  const struct color *color=colorv+rand()%(sizeof(colorv)/sizeof(colorv[0]));
+static uint32_t randomize_color(const struct color *color) {
   uint8_t r=color->r+((rand()&0x1f)-0x10);
   uint8_t g=color->g+((rand()&0x1f)-0x10);
   uint8_t b=color->b+((rand()&0x1f)-0x10);
@@ -48,7 +53,8 @@ static void session_reset_flowers() {
         flower->x=col;
         flower->y=row;
         flower->tileid=0x40+rand()%3;
-        flower->tint=session_next_flower_tint();
+        flower->colorid=rand()%COLORC;
+        flower->tint=randomize_color(colorv+flower->colorid);
       }
     }
   }
@@ -96,4 +102,21 @@ int session_flowerp_by_mapid(int mapid) {
     }
   }
   return lo;
+}
+
+int session_flowerp_by_location(int mapid,int x,int y) {
+  if ((mapid<0)||(mapid>0xffff)||(x<0)||(x>=0xff)||(y<0)||(y>0xff)) return -1;
+  int lo=0,hi=g.session.flowerc;
+  while (lo<hi) {
+    int ck=(lo+hi)>>1;
+    const struct session_flower *flower=g.session.flowerv+ck;
+         if (mapid<flower->mapid) hi=ck;
+    else if (mapid>flower->mapid) lo=ck+1;
+    else if (y<flower->y) hi=ck;
+    else if (y>flower->y) lo=ck+1;
+    else if (x<flower->x) hi=ck;
+    else if (x>flower->x) lo=ck+1;
+    else return ck;
+  }
+  return -1;
 }

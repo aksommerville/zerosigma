@@ -78,4 +78,6 @@ SPRCTL_FOR_EACH
 void hero_button_down(struct sprite *sprite,int btnid);
 void hero_button_up(struct sprite *sprite,int btnid);
 
+void sprite_flower_remove_by_flowerid(int flowerid);
+
 #endif

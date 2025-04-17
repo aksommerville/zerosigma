@@ -292,8 +292,22 @@ static void scene_render_sprites() {
 /* Render overlay.
  */
  
+static int scene_render_flower_count(int x,int y,uint32_t rgba,int c) {
+  graf_draw_rect(&g.graf,x,y,6,7,0x000000ff);
+  graf_set_tint(&g.graf,rgba);
+  graf_draw_tile(&g.graf,g.texid_sprites,x+3,y+4,0x60+c%10,0);
+  graf_set_tint(&g.graf,0);
+  return 7; // x advancement
+}
+ 
 static void scene_render_overlay() {
-  //TODO Basket contents.
+
+  int x=1,y=1,i;
+  int count_by_color[COLORC]={0};
+  const struct session_flower *flower=g.session.bouquetv;
+  for (i=g.session.bouquetc;i-->0;flower++) count_by_color[flower->colorid]++;
+  for (i=0;i<COLORC;i++) x+=scene_render_flower_count(x,y,display_colorv[i],count_by_color[i]);
+
   //TODO Clock? HP? Minimap? Score?
 }
 

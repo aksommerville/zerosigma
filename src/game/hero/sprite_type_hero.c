@@ -26,6 +26,14 @@ static int _hero_init(struct sprite *sprite) {
   return 0;
 }
 
+/* Change map. Drop transient things.
+ */
+ 
+static void _hero_map_changed(struct sprite *sprite) {
+  hero_history_zap(sprite);
+  SPRITE->flower=0;
+}
+
 /* Update animation.
  */
  
@@ -137,6 +145,7 @@ static void hero_update_wallgrab(struct sprite *sprite) {
  */
  
 static void hero_update_ladder(struct sprite *sprite,double elapsed) {
+  SPRITE->flower=0;
   sprite->x=SPRITE->ladderx;
   if (SPRITE->indy) {
     sprite->y+=HERO_LADDER_CLIMB_SPEED*elapsed*SPRITE->indy;
@@ -158,6 +167,41 @@ static void hero_update_ladder(struct sprite *sprite,double elapsed) {
       }
     }
   }
+}
+
+/* Check for a candidate flower.
+ * We'll poll this every frame.
+ * (except it doesn't happen while on a ladder; that's fine, there's definitely no flower-picking while laddered)
+ */
+ 
+static void hero_update_flower(struct sprite *sprite) {
+  SPRITE->flower=0;
+  if (!SPRITE->seated) return;
+  if (g.session.bouquetc>=BOUQUET_LIMIT) return;
+  
+  /* This polls often so keep it lean: First check tileid, since that's constant-time.
+   * If it's a flowerable tile, then search by the exact location (O(log2(n)) time).
+   */
+  int col=(int)sprite->x,row=(int)sprite->y;
+  if ((col<0)||(col>=g.scene.map->w)||(row<0)||(row>=g.scene.map->h)) return;
+  uint8_t tileid=g.scene.map->v[row*g.scene.map->w+col];
+  if ((tileid<0x05)||(tileid>0x08)) return;
+  int flowerp=session_flowerp_by_location(g.scene.map->rid,col,row);
+  if (flowerp<0) return;
+  
+  /* We're going to display the bouquet content with a single digit per color.
+   * There is never a situation where you'd want more than 9 of a color, that's just too many.
+   * If we already have 9 of this color, don't allow picking.
+   */
+  struct session_flower *flower=g.session.flowerv+flowerp;
+  const struct session_flower *q=g.session.bouquetv;
+  int alreadyc=0,i=g.session.bouquetc;
+  for (;i-->0;q++) {
+    if (q->colorid==flower->colorid) alreadyc++;
+  }
+  if (alreadyc>=9) return;
+  
+  SPRITE->flower=flower;
 }
 
 /* Update.
@@ -190,6 +234,20 @@ static void _hero_update(struct sprite *sprite,double elapsed) {
   }
   
   hero_update_wallgrab(sprite);
+  hero_update_flower(sprite);
+}
+
+/* Flower indicator.
+ */
+ 
+static void hero_draw_flower_indicator(struct sprite *sprite,int x,int y) {
+  y-=NS_sys_tilesize*2;
+  graf_draw_tile(&g.graf,g.texid_sprites,x-NS_sys_tilesize,y,0x22,0);
+  graf_draw_tile(&g.graf,g.texid_sprites,x,y,0x23,0);
+  graf_draw_tile(&g.graf,g.texid_sprites,x+NS_sys_tilesize-3,y-2,SPRITE->flower->tileid,0);
+  graf_set_tint(&g.graf,SPRITE->flower->tint);
+  graf_draw_tile(&g.graf,g.texid_sprites,x+NS_sys_tilesize-3,y-2,SPRITE->flower->tileid+0x10,0);
+  graf_set_tint(&g.graf,0);
 }
 
 /* Render.
@@ -295,6 +353,10 @@ static void _hero_render(struct sprite *sprite,int x,int y) {
     int dy=-(int)(minextent+(maxextent-minextent)*t);
     graf_draw_tile(&g.graf,g.texid_sprites,x,y-NS_sys_tilesize+dy,0x20+(SPRITE->animframe&1),sprite->xform);
   }
+  
+  /* If there's a pickable flower, draw an indicator above her head.
+   */
+  if (SPRITE->flower) hero_draw_flower_indicator(sprite,x,y);
 }
 
 /* Type definition.
@@ -309,7 +371,7 @@ const struct sprite_type sprite_type_hero={
   .render=_hero_render,
   .fall_begin=hero_fall_begin,
   .fall_end=hero_fall_end,
-  .map_changed=hero_history_zap,
+  .map_changed=_hero_map_changed,
 };
 
 /* Begin echo.

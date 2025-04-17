@@ -106,10 +106,34 @@ static int hero_check_ladder(struct sprite *sprite) {
   return 1;
 }
 
+/* Pick flower.
+ */
+ 
+static void hero_pick_flower(struct sprite *sprite) {
+  if (!SPRITE->flower) return;
+  if (g.session.bouquetc>=BOUQUET_LIMIT) return;
+  sprite_flower_remove_by_flowerid(SPRITE->flower->flowerid);
+  int p=session_flowerp_by_flowerid(SPRITE->flower->flowerid);
+  if (p<0) return;
+  memcpy(g.session.bouquetv+g.session.bouquetc++,SPRITE->flower,sizeof(struct session_flower));
+  egg_play_sound(RID_sound_pick);
+  //TODO Visual fireworks?
+  g.session.flowerc--;
+  memmove(SPRITE->flower,SPRITE->flower+1,sizeof(struct session_flower)*(g.session.flowerc-p));
+  SPRITE->flower=0;
+}
+
 /* Vertical input state change.
  */
  
 static void hero_indy_changed(struct sprite *sprite) {
+
+  /* If we're proposing a flower-pick, and user pressed Down, do it.
+   */
+  if (SPRITE->flower&&(SPRITE->indy>0)) {
+    hero_pick_flower(sprite);
+    return;
+  }
 
   /* If we're on a ladder, no action necessary.
    * Otherwise, on nonzero changes, check whether there's a ladder to grab.
@@ -119,6 +143,8 @@ static void hero_indy_changed(struct sprite *sprite) {
     if (hero_check_ladder(sprite)) return;
   }
 
+  /* Abort jump with fastfall.
+   */
   if ((SPRITE->indy>0)&&SPRITE->injump&&(SPRITE->jump_power>0.0)) {
     SPRITE->jump_power=0.0;
     sprite->suspend_gravity=0;
@@ -130,6 +156,8 @@ static void hero_indy_changed(struct sprite *sprite) {
     return;
   }
 
+  /* Other fastfall start and end cases.
+   */
   if (sprite->graviting) {
     if (SPRITE->indy>0) {
       SPRITE->walljump=0;

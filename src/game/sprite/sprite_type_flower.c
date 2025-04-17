@@ -46,3 +46,18 @@ const struct sprite_type sprite_type_flower={
   .init=_flower_init,
   .render=_flower_render,
 };
+
+/* Remove by flowerid.
+ */
+ 
+void sprite_flower_remove_by_flowerid(int flowerid) {
+  struct sprite **p=g.spritev;
+  int i=g.spritec;
+  for (;i-->0;p++) {
+    struct sprite *sprite=*p;
+    if (sprite->type!=&sprite_type_flower) continue;
+    if (sprite->arg!=flowerid) continue;
+    sprite->defunct=1;
+    return;
+  }
+}
