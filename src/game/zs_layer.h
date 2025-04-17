@@ -26,5 +26,7 @@ struct zs_layer *zs_layers_get_focus();
  * These all return weak on success.
  */
 struct zs_layer *zs_layer_spawn_play();
+struct zs_layer *zs_layer_spawn_dayend();
+struct zs_layer *zs_layer_spawn_gameover();
 
 #endif

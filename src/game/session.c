@@ -1,9 +1,6 @@
 #include "zs.h"
 
-/* Select tint for a flower.
- * They should be random, but also balanced overall.
- * Regular PRNG does meet that requirement, but only on long periods -- probably longer than we can tolerate.
- * Well... I dunno. Let's start dumb and see what happens.
+/* Flower colors.
  */
  
 // Keep all channels in 0x10..0xf0: We randomly add or subtract up to 15 from each channel.
@@ -30,11 +27,14 @@ static uint32_t randomize_color(const struct color *color) {
   return (r<<24)|(g<<16)|(b<<8)|0xff;
 }
 
-/* Generate the set of flowers.
+/* We match colors to positions randomly, but there are always exactly 45 of each color.
+ * That's important: If you're playing at the limit, you'll pick 9 of each at each of the 5 days, leaving exactly none at the end.
+ * Shape is not important, so we pick randomly.
  */
  
 static void session_reset_flowers() {
   g.session.flowerc=0;
+  int remaining_by_color[COLORC]={45,45,45,45,45};
   uint16_t flowerid=1;
   struct zs_map *map=g.mapv;
   int mapi=g.mapc;
@@ -47,13 +47,28 @@ static void session_reset_flowers() {
           fprintf(stderr,"!!! Too many flowers (%d).\n",FLOWER_LIMIT);
           return;
         }
+        
+        int range=0,i=0;
+        for (;i<COLORC;i++) if (remaining_by_color[i]) range++;
+        if (!range) return;
+        int choice=rand()%range;
+        int colorid=0;
+        for (i=0;i<COLORC;i++) {
+          if (!remaining_by_color[i]) continue;
+          if (!choice--) {
+            remaining_by_color[i]--;
+            colorid=i;
+            break;
+          }
+        }
+        
         struct session_flower *flower=g.session.flowerv+g.session.flowerc++;
         flower->flowerid=flowerid++;
         flower->mapid=map->rid;
         flower->x=col;
         flower->y=row;
         flower->tileid=0x40+rand()%3;
-        flower->colorid=rand()%COLORC;
+        flower->colorid=colorid;
         flower->tint=randomize_color(colorv+flower->colorid);
       }
     }

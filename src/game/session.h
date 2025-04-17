@@ -7,11 +7,15 @@
 #ifndef SESSION_H
 #define SESSION_H
 
-/* TODO Once the maps are final-ish, determine how many flowers we actually need.
- * Should be considerably less than 1024.
+/* 5 colors, 5 days, and up to nine per color per day.
+ * A single bouquet can't have more than 45 flowers.
+ * The world should have exactly 225 flowers, exactly 45 of each color.
+ * So it is only just barely possible to exhaust the world's flowers, and never possible to need another one.
  */
-#define FLOWER_LIMIT 1024
-#define BOUQUET_LIMIT 45 /* 5 colors, up to 9 apiece. */
+#define FLOWER_LIMIT 225
+#define BOUQUET_LIMIT 45
+
+#define DAYC 5
 
 #define COLORC 5
 struct color {
@@ -21,6 +25,8 @@ extern const struct color colorv[COLORC];
 extern const uint32_t display_colorv[COLORC]; // Packed RGBA for use in general UI. Suitable for black foreground.
 
 struct session {
+
+  double playtime; // s. Doesn't count time in menus.
 
   /* Flowers are sorted by (flowerid) and also by (mapid,y,x).
    */
@@ -36,6 +42,13 @@ struct session {
   
   struct session_flower bouquetv[BOUQUET_LIMIT];
   int bouquetc;
+  
+  struct summary {
+    int flowers[COLORC]; // Count by color.
+    int score;
+    int rule; // Index in strings:1 (6..10). Only 6 and 7 are valid, and will be accompanied by a nonzero score.
+  } summaryv[DAYC];
+  int summaryc;
 };
 
 int session_reset();

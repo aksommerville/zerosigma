@@ -137,8 +137,8 @@ struct sprite *sprite_spawn_rid(double x,double y,int rid,uint32_t arg) {
   sprite->arg=arg;
   sprite->x=sprite->pvx=x;
   sprite->y=sprite->pvy=y;
-  sprite->cmdv=src;
-  sprite->cmdc=srcc;
+  sprite->cmdv=rspr.cmdv;
+  sprite->cmdc=rspr.cmdc;
   sprite_read_generic_commands(sprite);
   return sprite_spawn_finish(sprite);
 }

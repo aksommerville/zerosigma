@@ -1,2 +1,15 @@
 1 English
 2 Zero Sigma Florist
+
+# Customer dialogue.
+3 One bouquet, please!
+4 Needs more flowers.
+5 Thank you!
+
+# Daily summary rules.
+# It shouldn't be possible to trigger rule 10 "Too few flowers", but it's listed for consistency.
+6 Perfect
+7 Valid
+8 Imbalanced
+9 Too few colors (min 3)
+10 Too few flowers (min 5)

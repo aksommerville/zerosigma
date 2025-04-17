@@ -64,6 +64,7 @@ static int scene_load_map(int rid) {
  */
  
 int scene_reset() {
+  memset(&g.scene,0,sizeof(struct scene));
   if (scene_load_map(RID_map_home)<0) return -1;
   return 0;
 }
@@ -147,6 +148,13 @@ static void scene_check_doors(double elapsed) {
  */
  
 void scene_update(double elapsed) {
+  if (g.scene.finish>0.0) {
+    if ((g.scene.finish-=elapsed)<=0.0) {
+      zs_layer_spawn_dayend();
+      return;
+    }
+  }
+  g.session.playtime+=elapsed;
   if ((g.scene.earthquake-=elapsed)<=0.0) {
     g.scene.earthquake=0.0;
   }
@@ -154,7 +162,6 @@ void scene_update(double elapsed) {
   reap_defunct_sprites();
   physics_update(elapsed);
   scene_check_doors(elapsed);
-  //TODO Terminal conditions.
 }
 
 /* Refresh camera's position.
@@ -321,6 +328,11 @@ void scene_render() {
   scene_partial_sort_sprites();
   scene_render_sprites();
   scene_render_overlay();
+  if ((g.scene.finish>0.0)&&(g.scene.finish<1.0)) {
+    int alpha=255-(int)(g.scene.finish*255);
+    if (alpha<0) alpha=0; else if (alpha>0xff) alpha=0xff;
+    graf_draw_rect(&g.graf,0,0,FBW,FBH,0x00000000|alpha);
+  }
 }
 
 /* Sprite list.

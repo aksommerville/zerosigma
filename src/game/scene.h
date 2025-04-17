@@ -7,12 +7,15 @@
 #ifndef SCENE_H
 #define SCENE_H
 
+#define SCENE_FINISH_TIME 2.0
+
 struct scene {
   struct zs_map *map;
   int scrollx,scrolly; // Top left of view in map pixels, updated at the start of each render.
   double door_blackout;
   double earthquake;
   int sprite_sort_d;
+  double finish; // Counts down if >0.
 };
 
 int scene_reset();

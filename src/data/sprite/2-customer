@@ -1,0 +1,3 @@
+image image:sprites
+tile 0x70 0
+sprctl (u16:sprctl)customer

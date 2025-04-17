@@ -37,3 +37,4 @@ door @49,3 map:ne @0,25 0x0000
 door @0,26 map:sw @39,12 0x0000
 door @15,29 map:s @15,0 0x0000
 door @49,24 map:se @0,18 0x0000
+sprite @48,13 sprite:customer 0x00000000
