@@ -96,6 +96,7 @@ static int hero_check_ladder(struct sprite *sprite) {
   }
   sprite->x=SPRITE->ladderx=col+0.5;
   sprite->suspend_gravity=1;
+  sprite->terminal_velocity=DEFAULT_TERMINAL_VELOCITY;
   SPRITE->fastfall=0;
   SPRITE->echo_record=0;
   SPRITE->wallgrab=0;
@@ -138,6 +139,7 @@ static void hero_indy_changed(struct sprite *sprite) {
       sprite->gravity=sprite->terminal_velocity=HERO_FASTFALL_VELOCITY;
     } else if (SPRITE->fastfall) {
       SPRITE->fastfall=0;
+      SPRITE->echo_record=0;
       sprite->gravity=sprite->terminal_velocity=DEFAULT_TERMINAL_VELOCITY;
     }
     return;

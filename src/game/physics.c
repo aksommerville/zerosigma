@@ -45,13 +45,16 @@ static int physics_resolve_gravity_collisions(struct sprite *sprite) {
 }
 
 /* Escape sprite from a rectangular collision.
+ * Caller may indicate that one axis is to be unpreferred.
  */
  
-static void physics_escape_box(struct sprite *sprite,double l,double t,double r,double b) {
+static void physics_escape_box(struct sprite *sprite,double l,double t,double r,double b,int horzok,int vertok) {
   double escl=sprite->x+sprite->phr-l;
   double escr=r-sprite->phl-sprite->x;
   double esct=sprite->y+sprite->phb-t;
   double escb=b-sprite->pht-sprite->y;
+  if (!horzok) { escl+=99.0; escr+=99.0; }
+  if (!vertok) { esct+=99.0; escb+=99.0; }
   if ((escl<=escr)&&(escl<=esct)&&(escl<=escb)) {
     sprite->x=l-sprite->phr;
   } else if ((escr<=esct)&&(escr<=escb)) {
@@ -104,6 +107,7 @@ static void physics_resolve_map() {
       rowz--;
     }
     
+    int s=g.scene.map->w;
     const uint8_t *cellrow=g.scene.map->v+rowa*g.scene.map->w+cola;
     int row=rowa; for (;row!=rowz;row+=drow,cellrow+=g.scene.map->w*drow) {
       const uint8_t *cell=cellrow;
@@ -111,9 +115,10 @@ static void physics_resolve_map() {
         uint8_t physics=g.physics[*cell];
         if (!(sprite->physics_mask&(1<<physics))) continue;
         double l=col,t=row,r=col+1.0,b=row+1.0;
-        if (!col) l=-999.0; else if (col>=g.scene.map->w-1) r=999.0;
-        if (!row) t=-999.0; else if (row>=g.scene.map->h-1) b=999.0;
-        physics_escape_box(sprite,l,t,r,b);
+        int horzok=1,vertok=1;
+        if (!col) l=-999.0; else if (col>=g.scene.map->w-1) r=999.0; else if ((sprite->physics_mask&(1<<g.physics[cell[-1]]))&&(sprite->physics_mask&(1<<g.physics[cell[1]]))) horzok=0;
+        if (!row) t=-999.0; else if (row>=g.scene.map->h-1) b=999.0; else if ((sprite->physics_mask&(1<<g.physics[cell[-s]]))&&(sprite->physics_mask&(1<<g.physics[cell[s]]))) vertok=0;
+        physics_escape_box(sprite,l,t,r,b,horzok,vertok);
       }
     }
   }

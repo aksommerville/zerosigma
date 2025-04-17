@@ -21,6 +21,7 @@ struct sprite {
   int solid; // Nonzero to participate in sprite-on-sprite physics.
   uint32_t physics_mask; // Which physics values are solid to me, eg (1<<NS_physics_solid).
   int defunct;
+  int layer; // Render order within a layer is undefined. Hero is 100, flowers are 50.
   
   // Private to physics:
   int graviting;

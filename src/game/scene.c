@@ -26,6 +26,20 @@ static int scene_apply_map_commands() {
   return 0;
 }
 
+/* Create a sprite for each flower in this map.
+ */
+ 
+static int scene_grow_flowers() {
+  int p=session_flowerp_by_mapid(g.scene.map->rid);
+  for (;p<g.session.flowerc;p++) {
+    const struct session_flower *flower=g.session.flowerv+p;
+    if (flower->mapid!=g.scene.map->rid) break;
+    struct sprite *sprite=sprite_spawn_type(flower->x+0.5,flower->y+0.5,&sprite_type_flower,flower->flowerid);
+    if (!sprite) return -1;
+  }
+  return 0;
+}
+
 /* Load map etc.
  */
  
@@ -42,6 +56,7 @@ static int scene_load_map(int rid) {
   }
   fprintf(stderr,"%s: Loaded map:%d, %dx%d\n",__func__,rid,g.scene.map->w,g.scene.map->h);
   if (scene_apply_map_commands()<0) return -1;
+  if (scene_grow_flowers()<0) return -1;
   return 0;
 }
 
@@ -221,6 +236,41 @@ static void scene_render_map() {
   }
 }
 
+/* One pass of a bubble sort on the sprite list, alternating direction.
+ * We allow them to be out of order briefly.
+ */
+ 
+static int spritecmp(const struct sprite *a,const struct sprite *b) {
+  // Must return -1,0,1: "a-b" won't work.
+  if (a->layer<b->layer) return -1;
+  if (a->layer>b->layer) return 1;
+  return 0;
+}
+ 
+static void scene_partial_sort_sprites() {
+  if (g.spritec<2) return;
+  int first,last,i,d;
+  if (g.scene.sprite_sort_d==1) {
+    first=0;
+    last=g.spritec-1;
+    d=1;
+    g.scene.sprite_sort_d=-1;
+  } else {
+    first=g.spritec-1;
+    last=0;
+    d=-1;
+    g.scene.sprite_sort_d=1;
+  }
+  for (i=first;i!=last;i+=d) {
+    struct sprite *a=g.spritev[i];
+    struct sprite *b=g.spritev[i+d];
+    if (spritecmp(a,b)==d) {
+      g.spritev[i]=b;
+      g.spritev[i+d]=a;
+    }
+  }
+}
+
 /* Render sprites.
  */
  
@@ -254,6 +304,7 @@ void scene_render() {
   scene_calculate_scroll();
   scene_render_bg();
   scene_render_map();
+  scene_partial_sort_sprites();
   scene_render_sprites();
   scene_render_overlay();
 }

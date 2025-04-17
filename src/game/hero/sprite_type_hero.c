@@ -17,6 +17,7 @@ static void hero_history_zap(struct sprite *sprite) {
  */
  
 static int _hero_init(struct sprite *sprite) {
+  sprite->layer=100;
   sprite->physics_mask=(1<<NS_physics_solid);
   sprite->pht=-1.125;
   SPRITE->jump_power=HERO_JUMP_POWER_DEFAULT;

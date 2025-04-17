@@ -12,6 +12,7 @@ struct scene {
   int scrollx,scrolly; // Top left of view in map pixels, updated at the start of each render.
   double door_blackout;
   double earthquake;
+  int sprite_sort_d;
 };
 
 int scene_reset();

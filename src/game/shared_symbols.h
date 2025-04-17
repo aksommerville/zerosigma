@@ -26,7 +26,9 @@
 #define NS_physics_ladder 3
 
 #define NS_sprctl_hero 1
+#define NS_sprctl_flower 2
 #define SPRCTL_FOR_EACH \
-  _(hero)
+  _(hero) \
+  _(flower)
 
 #endif
