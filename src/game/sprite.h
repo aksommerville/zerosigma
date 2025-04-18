@@ -46,6 +46,9 @@ struct sprite_type {
   
   // Only relevant to the hero. Other sprites don't survive transitions.
   void (*map_changed)(struct sprite *sprite);
+  
+  // Epicenter is the hero's position, where she hit the ground. All sprites that implement this get notified each time.
+  void (*earthquake)(struct sprite *sprite,double epix,double epiy);
 };
 
 /* Plain sprite_new() DOES NOT call (type->init).
@@ -81,5 +84,7 @@ void hero_button_up(struct sprite *sprite,int btnid);
 void sprite_flower_remove_by_flowerid(int flowerid);
 
 void squishroom_compress(struct sprite *sprite);
+
+void snore_drop_all();
 
 #endif

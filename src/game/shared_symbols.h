@@ -31,17 +31,20 @@
 #define NS_sprctl_customer 3
 #define NS_sprctl_teleghost 4
 #define NS_sprctl_squishroom 5
+#define NS_sprctl_goat 6
+#define NS_sprctl_snore 7
 #define SPRCTL_FOR_EACH \
   _(hero) \
   _(flower) \
   _(customer) \
   _(teleghost) \
-  _(squishroom)
+  _(squishroom) \
+  _(goat) \
+  _(snore)
   
 // Flags zero and one have constant values; they can't be changed.
 #define NS_flag_zero 0
 #define NS_flag_one 1
-#define NS_flag_squishroom1 2
-#define NS_flag_COUNT 3
+#define NS_flag_COUNT 2
 
 #endif

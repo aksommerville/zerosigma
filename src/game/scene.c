@@ -54,7 +54,7 @@ static int scene_load_map(int rid) {
     fprintf(stderr,"map:%d not found\n",rid);
     return -1;
   }
-  fprintf(stderr,"%s: Loaded map:%d, %dx%d\n",__func__,rid,g.scene.map->w,g.scene.map->h);
+  //fprintf(stderr,"%s: Loaded map:%d, %dx%d\n",__func__,rid,g.scene.map->w,g.scene.map->h);
   if (scene_apply_map_commands()<0) return -1;
   if (scene_grow_flowers()<0) return -1;
   return 0;
@@ -371,6 +371,13 @@ struct sprite *scene_get_hero() {
 /* Begin earthquake.
  */
  
-void scene_begin_earthquake() {
+void scene_begin_earthquake(double epix,double epiy) {
   g.scene.earthquake=1.000;
+  struct sprite **p=g.spritev;
+  int i=g.spritec;
+  for (;i-->0;p++) {
+    struct sprite *sprite=*p;
+    if (!sprite->type->earthquake) continue;
+    sprite->type->earthquake(sprite,epix,epiy);
+  }
 }

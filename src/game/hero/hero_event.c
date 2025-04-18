@@ -20,7 +20,7 @@ void hero_fall_end(struct sprite *sprite,double pressure,struct sprite *floor) {
       squishroom_compress(floor);
     } else {
       egg_play_sound(RID_sound_thump_fastfall);
-      scene_begin_earthquake();
+      scene_begin_earthquake(sprite->x,sprite->y);
     }
     return;
   }

@@ -72,7 +72,7 @@ Gather flowers of various colors and get scored based on count and color balance
 - - - We can probably do this with a squishroom: Put a oneway platform 5 meters above it that could only be reached by jumping from the squishroom.
 - - [x] Walljump across a 1-meter outcrop.
 - - [x] 2-meter outcrop? It's possible but very difficult.
-- - [ ] Goat that eats flowers if you wake him up.
+- - [x] Goat that eats flowers if you wake him up.
 - - [ ] Monkey that grabs your back and restricts jumping.
 - - [ ] Treadle-triggered flamethrower, burns the flowers.
 - - [ ] Crush-o-matic, forces you to the edge you entered from.

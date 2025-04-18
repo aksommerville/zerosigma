@@ -29,6 +29,6 @@ void scene_render();
 
 struct sprite *scene_get_hero();
 
-void scene_begin_earthquake();
+void scene_begin_earthquake(double epix,double epiy);
 
 #endif
