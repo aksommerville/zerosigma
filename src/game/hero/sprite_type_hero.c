@@ -212,6 +212,10 @@ static void hero_update_flower(struct sprite *sprite) {
 static void _hero_update(struct sprite *sprite,double elapsed) {
   hero_animate(sprite,elapsed);
   
+  if ((SPRITE->teleport_highlight-=elapsed)<=0.0) {
+    SPRITE->teleport_highlight=0.0;
+  }
+  
   if (SPRITE->ladderx>0.0) {
     hero_update_ladder(sprite,elapsed);
     return;
@@ -314,8 +318,17 @@ static void _hero_render(struct sprite *sprite,int x,int y) {
       case 7: col=3; break;
     }
   }
-  graf_draw_tile(&g.graf,g.texid_sprites,x,y-NS_sys_tilesize,0x00+col,sprite->xform);
-  graf_draw_tile(&g.graf,g.texid_sprites,x,y,0x10+col,sprite->xform);
+  if (SPRITE->teleport_highlight>0.0) {
+    int alpha=(SPRITE->teleport_highlight*255.0)/HERO_TELEPORT_HIGHLIGHT_TIME;
+    if (alpha>0xff) alpha=0xff;
+    graf_set_tint(&g.graf,0xffffff00|alpha);
+    graf_draw_tile(&g.graf,g.texid_sprites,x,y-NS_sys_tilesize,0x00+col,sprite->xform);
+    graf_draw_tile(&g.graf,g.texid_sprites,x,y,0x10+col,sprite->xform);
+    graf_set_tint(&g.graf,0);
+  } else {
+    graf_draw_tile(&g.graf,g.texid_sprites,x,y-NS_sys_tilesize,0x00+col,sprite->xform);
+    graf_draw_tile(&g.graf,g.texid_sprites,x,y,0x10+col,sprite->xform);
+  }
   
   /* If we're recording echoes, do that.
    */

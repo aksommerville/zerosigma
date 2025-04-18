@@ -69,9 +69,6 @@ static void score_summary(struct summary *summary) {
   if (totalc<5) {
     summary->rule=10;
     valid=0;
-  } else if (colorc<3) {
-    summary->rule=9;
-    valid=0;
   } else if (!valid) {
     summary->rule=8;
   } else if (totalc>=45) {
@@ -80,13 +77,10 @@ static void score_summary(struct summary *summary) {
     summary->rule=7;
   }
   if (valid) {
-    /* Score for invalid bouquets is always zero.
-     * If valid, it's driven by (q) and (colorc).
-     * How about (q**colorc)? That yields a maximum of 59049 for the day, and 295245 for the session.
-     * Also yields a minimum of 1 (five of the same color), so that's cool, it reaches both ends of the range.
-     */
-    summary->score=1;
-    for (i=colorc;i-->0;) summary->score*=q;
+    // Score for invalid bouquets is always zero.
+    // If valid, it's (q*colorc), so 1..45, except if it's maxed out, bonus-bump to 100.
+    if ((q==9)&&(colorc==5)) summary->score=100;
+    else summary->score=q*colorc;
   }
 }
 

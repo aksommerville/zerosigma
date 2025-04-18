@@ -67,8 +67,6 @@ struct zs_layer *zs_layer_spawn_play() {
   layer->focus=_play_focus;
   layer->render=_play_render;
   
-  //TODO init
-  
   if (scene_reset()<0) {
     layer->defunct=1;
     return 0;

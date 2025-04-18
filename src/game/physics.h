@@ -18,6 +18,12 @@ void physics_update(double elapsed);
  */
 int physics_downjump(struct sprite *sprite);
 
+/* If (x+dx) is a legal position, put the sprite there.
+ * Otherwise, look for any legal position up to (dx).
+ * Returns nonzero if moved.
+ */
+int physics_teleport(struct sprite *sprite,double dx);
+
 /* Nonzero if this point is within some solid body.
  */
 int physics_check_point(double x,double y);

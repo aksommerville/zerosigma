@@ -309,13 +309,34 @@ static int scene_render_flower_count(int x,int y,uint32_t rgba,int c) {
  
 static void scene_render_overlay() {
 
+  // Flower counters.
   int x=1,y=1,i;
   int count_by_color[COLORC]={0};
   const struct session_flower *flower=g.session.bouquetv;
   for (i=g.session.bouquetc;i-->0;flower++) count_by_color[flower->colorid]++;
   for (i=0;i<COLORC;i++) x+=scene_render_flower_count(x,y,display_colorv[i],count_by_color[i]);
+  
+  // Clock.
+  int frame=((int)(g.session.playtime*2.0))&1;
+  int sec=(int)g.session.playtime;
+  int min=sec/60;
+  if (min>99) min=sec=99;
+  else sec%=60;
+  char repr[5]={ // 0x60..0x69 are digits. 0x6a and 0x6b are the animated colon.
+    0x60+min/10,
+    0x60+min%10,
+    0x6a+frame,
+    0x60+sec/10,
+    0x60+sec%10,
+  };
+  y+=11;
+  graf_draw_tile(&g.graf,g.texid_sprites, 3,y,0x60+min/10,0);
+  graf_draw_tile(&g.graf,g.texid_sprites, 8,y,0x60+min%10,0);
+  graf_draw_tile(&g.graf,g.texid_sprites,12,y,0x6a+frame,0); // NB narrower than digits
+  graf_draw_tile(&g.graf,g.texid_sprites,15,y,0x60+sec/10,0);
+  graf_draw_tile(&g.graf,g.texid_sprites,20,y,0x60+sec%10,0);
 
-  //TODO Clock? HP? Minimap? Score?
+  //TODO HP? Minimap? Score?
 }
 
 /* Render.

@@ -17,6 +17,8 @@
 #define HERO_WALLGRAB_VELOCITY 4.0 /* m/s */
 #define HERO_LADDER_CLIMB_SPEED 4.0 /* m/s */
 #define HERO_ECHO_LIMIT 60
+#define HERO_TELEPORT_HIGHLIGHT_TIME 0.250 /* s */
+#define HERO_TELEPORT_REJECT_TIME 0.125 /* s, a quick blink to signal "yeah you pressed the button but we're not doing that" */
 
 struct sprite_hero {
   struct sprite hdr;
@@ -36,6 +38,7 @@ struct sprite_hero {
   int wallgrab;
   int seated;
   double ladderx; // >0.0, center of ladder column, if we're climbing.
+  double teleport_highlight; // Counts down after a teleport.
   
   struct hero_echo {
     double x,y;

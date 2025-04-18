@@ -28,9 +28,11 @@
 #define NS_sprctl_hero 1
 #define NS_sprctl_flower 2
 #define NS_sprctl_customer 3
+#define NS_sprctl_teleghost 4
 #define SPRCTL_FOR_EACH \
   _(hero) \
   _(flower) \
-  _(customer)
+  _(customer) \
+  _(teleghost)
 
 #endif

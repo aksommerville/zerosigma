@@ -283,19 +283,30 @@ static void hero_jump_end(struct sprite *sprite) {
   if (SPRITE->walljump) {
     SPRITE->walljump=0;
     sprite->gravity=0.0;
+    if (SPRITE->indx<0) sprite->xform=EGG_XFORM_XREV;
+    else if (SPRITE->indx>0) sprite->xform=0;
   }
   sprite->suspend_gravity=0;
   hero_rejoin_ladder(sprite);
 }
 
-/* Item input.
+/* Teleport
  */
  
-static void hero_item_begin(struct sprite *sprite) {
-  //TODO Items. Will there be such a thing?
-}
-
-static void hero_item_end(struct sprite *sprite) {
+static void hero_teleport(struct sprite *sprite) {
+  if (SPRITE->sorefoot>0.0) return;
+  if (SPRITE->ladderx>0.0) return;
+  const double reach=2.500;
+  double ox=sprite->x;
+  if (physics_teleport(sprite,(sprite->xform?-reach:reach))) {
+    egg_play_sound(RID_sound_teleport);
+    uint32_t arg=sprite->xform;
+    struct sprite *teleghost=sprite_spawn_type(ox,sprite->y,&sprite_type_teleghost,arg);
+    SPRITE->teleport_highlight=HERO_TELEPORT_HIGHLIGHT_TIME;
+  } else {
+    egg_play_sound(RID_sound_teleport_reject);
+    SPRITE->teleport_highlight=HERO_TELEPORT_REJECT_TIME;
+  }
 }
 
 /* Input state change.
@@ -310,7 +321,7 @@ void hero_button_down(struct sprite *sprite,int btnid) {
     case EGG_BTN_UP: if (SPRITE->indy<0) return; SPRITE->indy=-1; hero_indy_changed(sprite); break;
     case EGG_BTN_DOWN: if (SPRITE->indy>0) return; SPRITE->indy=1; hero_indy_changed(sprite); break;
     case EGG_BTN_SOUTH: if (SPRITE->injump) return; SPRITE->injump=1; hero_jump_begin(sprite); break;
-    case EGG_BTN_WEST: if (SPRITE->initem) return; SPRITE->initem=1; hero_item_begin(sprite); break;
+    case EGG_BTN_WEST: if (SPRITE->initem) return; SPRITE->initem=1; hero_teleport(sprite); break;
   }
 }
 
@@ -323,6 +334,6 @@ void hero_button_up(struct sprite *sprite,int btnid) {
     case EGG_BTN_UP: if (SPRITE->indy>=0) return; SPRITE->indy=0; hero_indy_changed(sprite); break;
     case EGG_BTN_DOWN: if (SPRITE->indy<=0) return; SPRITE->indy=0; hero_indy_changed(sprite); break;
     case EGG_BTN_SOUTH: if (!SPRITE->injump) return; SPRITE->injump=0; hero_jump_end(sprite); break;
-    case EGG_BTN_WEST: if (!SPRITE->initem) return; SPRITE->initem=0; hero_item_end(sprite); break;
+    case EGG_BTN_WEST: if (!SPRITE->initem) return; SPRITE->initem=0; break;
   }
 }

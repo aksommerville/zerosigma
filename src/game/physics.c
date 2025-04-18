@@ -239,6 +239,90 @@ int physics_downjump(struct sprite *sprite) {
   return 1;
 }
 
+/* Teleport.
+ */
+ 
+int physics_teleport(struct sprite *sprite,double dx) {
+  const double min=0.050;
+  double ox=sprite->x;
+  double nx=ox+dx;
+  
+  // Don't allow teleporting off-screen because it introduces a danger of penetrating the neighbor map too deeply.
+  if (nx+sprite->phl<0.0) {
+    nx=-sprite->phl;
+  } else if (nx+sprite->phr>g.scene.map->w) {
+    nx=g.scene.map->w-sprite->phr;
+  }
+  
+  // First check the map only on the target bounds. If that position is legal, great.
+  // Without this clause, Dot would not be able to teleport thru narrow walls. (we do want her to)
+  int okpos=1;
+  int rowa=(int)(sprite->y+sprite->pht+SPACE_FUDGE); if (rowa<0) rowa=0;
+  int rowz=(int)(sprite->y+sprite->phb-SPACE_FUDGE); if (rowz>=g.scene.map->h) rowz=g.scene.map->h-1;
+  {
+    int cola=(int)(nx+sprite->phl); if (cola<0) cola=0;
+    int colz=(int)(nx+sprite->phr); if (rowz>=g.scene.map->w) colz=g.scene.map->w-1;
+    const uint8_t *cellrow=g.scene.map->v+rowa*g.scene.map->w+cola;
+    int row=rowa; for (;row<=rowz;row++,cellrow+=g.scene.map->w) {
+      const uint8_t *cellp=cellrow;
+      int col=cola; for (;col<=colz;col++,cellp++) {
+        uint8_t physics=g.physics[*cellp];
+        switch (physics) {
+          case NS_physics_solid: okpos=0; goto _done_precheck_;
+        }
+      }
+    }
+   _done_precheck_:;
+  }
+  
+  // If there's a solid map cell, bump to its edge per dx sign. Walk from far to near.
+  if (!okpos) {
+    int cola,colz,dcol;
+    if (dx<0.0) {
+      cola=(int)(nx+sprite->phl);
+      colz=(int)(sprite->x+sprite->phr);
+      if (cola<0) cola=0; else if (cola>=g.scene.map->w) cola=g.scene.map->w-1;
+      if (colz<0) colz=0; else if (colz>=g.scene.map->w) colz=g.scene.map->w-1;
+      colz++;
+      dcol=1;
+    } else {
+      cola=(int)(nx+sprite->phr);
+      colz=(int)(sprite->x+sprite->phl);
+      if (cola<0) cola=0; else if (cola>=g.scene.map->w) cola=g.scene.map->w-1;
+      if (colz<0) colz=0; else if (colz>=g.scene.map->w) colz=g.scene.map->w-1;
+      colz--;
+      dcol=-1;
+    }
+    int col=cola; for (;col!=colz;col+=dcol) {
+      const uint8_t *p=g.scene.map->v+rowa*g.scene.map->w+col;
+      int row=rowa; for (;row<=rowz;row++,p+=g.scene.map->w) {
+        uint8_t physics=g.physics[*p];
+        switch (physics) {
+          case NS_physics_solid: {
+              if (dcol==1) {
+                nx=(double)col+1.0-sprite->phl;
+              } else {
+                nx=(double)col-sprite->phr;
+              }
+            } break;
+        }
+      }
+    }
+  }
+  
+  // If we've backed up beyond the minimum threshold, forget it.
+  double d=nx-ox;
+  if (dx<0.0) {
+    if (d>-min) return 0;
+  } else {
+    if (d<min) return 0;
+  }
+  
+  // Apply change. Write it to (pvx) too, so we won't accidentally undo it during rectification.
+  sprite->x=sprite->pvx=nx;
+  return 1;
+}
+
 /* Check point.
  */
  
