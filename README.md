@@ -76,4 +76,4 @@ Gather flowers of various colors and get scored based on count and color balance
 - - "Tidy Garden"? "Magic Garden"?
 - - Day-end songs should have a much shorter lead-in.
 - [ ] Recheck ladder at the peak of a jump, if Y axis nonzero. So you can jump up a ladder instead of climbing, without having to release and re-press Up.
-- [ ] Use Up instead of Down for picking.
+- [x] Use Up instead of Down for picking.

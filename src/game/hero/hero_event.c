@@ -128,9 +128,9 @@ static void hero_pick_flower(struct sprite *sprite) {
  
 static void hero_indy_changed(struct sprite *sprite) {
 
-  /* If we're proposing a flower-pick, and user pressed Down, do it.
+  /* If we're proposing a flower-pick, and user pressed Up, do it.
    */
-  if (SPRITE->flower&&(SPRITE->indy>0)) {
+  if (SPRITE->flower&&(SPRITE->indy<0)) {
     hero_pick_flower(sprite);
     return;
   }
