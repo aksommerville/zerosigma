@@ -7,7 +7,8 @@
 #ifndef SCENE_H
 #define SCENE_H
 
-#define SCENE_FINISH_TIME 2.0
+// Keep this above 1.0: From 1 to 0, we fade out.
+#define SCENE_FINISH_TIME 1.5
 
 struct scene {
   struct zs_map *map;
