@@ -74,6 +74,7 @@ static void sprite_read_generic_commands(struct sprite *sprite) {
   struct rom_command cmd;
   while (rom_command_reader_next(&cmd,&reader)>0) {
     switch (cmd.opcode) {
+      case CMD_sprite_solid: sprite->solid=1; break;
       case CMD_sprite_tile: {
           sprite->tileid=cmd.argv[0];
           sprite->xform=cmd.argv[1];

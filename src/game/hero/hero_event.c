@@ -7,7 +7,7 @@ void hero_fall_begin(struct sprite *sprite) {
   SPRITE->seated=0;
 }
 
-void hero_fall_end(struct sprite *sprite,double pressure) {
+void hero_fall_end(struct sprite *sprite,double pressure,struct sprite *floor) {
   SPRITE->seated=1;
   SPRITE->jump_power=HERO_JUMP_POWER_DEFAULT;
   
@@ -16,8 +16,12 @@ void hero_fall_end(struct sprite *sprite,double pressure) {
     SPRITE->echo_record=0;
     sprite->terminal_velocity=DEFAULT_TERMINAL_VELOCITY;
     SPRITE->sorefoot=0.500;
-    egg_play_sound(RID_sound_thump_fastfall);
-    scene_begin_earthquake();
+    if (floor&&(floor->type==&sprite_type_squishroom)) {
+      squishroom_compress(floor);
+    } else {
+      egg_play_sound(RID_sound_thump_fastfall);
+      scene_begin_earthquake();
+    }
     return;
   }
   

@@ -11,6 +11,7 @@
 #define CMD_map_sprite    0x61 /* u16:pos u16:spriteid u32:reserved */
 #define CMD_map_door      0x62 /* u16:pos u16:mapid u16:dstpos u16:reserved */
 
+#define CMD_sprite_solid  0x01
 #define CMD_sprite_image  0x20 /* u16:imageid */
 #define CMD_sprite_tile   0x21 /* u8:tileid u8:xform */
 #define CMD_sprite_sprctl 0x22 /* u16:sprctl */
@@ -29,10 +30,18 @@
 #define NS_sprctl_flower 2
 #define NS_sprctl_customer 3
 #define NS_sprctl_teleghost 4
+#define NS_sprctl_squishroom 5
 #define SPRCTL_FOR_EACH \
   _(hero) \
   _(flower) \
   _(customer) \
-  _(teleghost)
+  _(teleghost) \
+  _(squishroom)
+  
+// Flags zero and one have constant values; they can't be changed.
+#define NS_flag_zero 0
+#define NS_flag_one 1
+#define NS_flag_squishroom1 2
+#define NS_flag_COUNT 3
 
 #endif

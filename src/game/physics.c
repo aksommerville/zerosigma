@@ -7,7 +7,7 @@
  * Returns nonzero if we corrected something.
  */
  
-static int physics_resolve_gravity_collisions(struct sprite *sprite) {
+static int physics_resolve_gravity_collisions(struct sprite *sprite,struct sprite **floor) {
   if (!sprite->physics_mask) return 0;
 
   /* Grid only needs checked if my foot passed from <= grid line to > grid line.
@@ -40,7 +40,34 @@ static int physics_resolve_gravity_collisions(struct sprite *sprite) {
     }
   }
   
-  //TODO Sprite-on-sprite collisions.
+  if (sprite->solid) {
+    // For now, only the hero can correct in sprite-on-sprite collisions, and we're not going to correct downward.
+    // So only do this for the hero. It's fine. No other solid sprite should be using gravity.
+    if (sprite->type==&sprite_type_hero) {
+      double al=sprite->x+sprite->phl+SPACE_FUDGE;
+      double ar=sprite->x+sprite->phr-SPACE_FUDGE;
+      double at=sprite->y+sprite->pht;
+      double ab=sprite->y+sprite->phb;
+      int bi=g.spritec;
+      while (bi-->0) {
+        struct sprite *b=g.spritev[bi];
+        if (!b->solid) continue;
+        if (b==sprite) continue;
+        double bl=b->x+b->phl;
+        double br=b->x+b->phr;
+        double bt=b->y+b->pht;
+        double bb=b->y+b->phb;
+        if (al>=br) continue;
+        if (ar<=bl) continue;
+        if (ab<=bt) continue;
+        if (at>=bb) continue;
+        sprite->y=bt-sprite->phb;
+        if (floor) *floor=b;
+        return 1;
+      }
+    }
+  }
+  
   return 0;
 }
 
@@ -124,11 +151,68 @@ static void physics_resolve_map() {
   }
 }
 
+/* Pick the sprite that will move to escape a sprite-on-sprite collision.
+ * (-1,1) for (a,b). Anything else, skip it.
+ */
+ 
+static int physics_pick_moveable_sprite(const struct sprite *a,const struct sprite *b) {
+  // I think we only care about sprite-on-sprite collisions when one of them is the hero.
+  // That assumption might not hold forever.
+  if (a->type==&sprite_type_hero) return -1;
+  if (b->type==&sprite_type_hero) return 1;
+  return 0;
+}
+
 /* Resolve sprite-on-sprite collisions.
  */
  
 static void physics_resolve_sprites() {
-  //TODO
+  int ai=g.spritec;
+  while (ai-->0) {
+    struct sprite *a=g.spritev[ai];
+    if (!a->solid) continue;
+    double al=a->x+a->phl;
+    double ar=a->x+a->phr;
+    double at=a->y+a->pht;
+    double ab=a->y+a->phb;
+    int bi=ai;
+    while (bi-->0) {
+      struct sprite *b=g.spritev[bi];
+      if (!b->solid) continue;
+      double bl=b->x+b->phl;
+      double br=b->x+b->phr;
+      double bt=b->y+b->pht;
+      double bb=b->y+b->phb;
+      
+      // Calculate escapements for (a), regardless of who will actually do the moving.
+      // If any escapement is zero or negative, there's no collision.
+      double escl=ar-bl; if (escl<=0.0) continue;
+      double escr=br-al; if (escr<=0.0) continue;
+      double esct=ab-bt; if (esct<=0.0) continue;
+      double escb=bb-at; if (escb<=0.0) continue;
+      double dx=0.0,dy=0.0;
+      if ((escl<=escr)&&(escl<=esct)&&(escl<=escb)) dx=-escl;
+      else if ((escr<=esct)&&(escr<=escb)) dx=escr;
+      else if (esct<=escb) dy=-esct;
+      else dy=escb;
+      
+      // Apply entirely to one or the other. If we want pushable sprites, just apportion this delta by inverse mass and apply to both.
+      switch (physics_pick_moveable_sprite(a,b)) {
+        case 1: {
+            b->x-=dx;
+            b->y-=dy;
+          } break;
+        case -1: {
+            a->x+=dx;
+            a->y+=dy;
+            al=a->x+a->phl;
+            ar=a->x+a->phr;
+            at=a->y+a->pht;
+            ab=a->y+a->phb;
+          } break;
+      }
+    }
+  }
 }
 
 /* Replace each sprite's (pvx,pvy).
@@ -169,11 +253,12 @@ static void physics_apply_gravity(double elapsed) {
     sprite->gravclock+=elapsed;
     sprite->y+=sprite->gravity*elapsed;
     
-    if (physics_resolve_gravity_collisions(sprite)||(sprite->y>=absolute_floor)) {
+    struct sprite *floor=0;
+    if (physics_resolve_gravity_collisions(sprite,&floor)||(sprite->y>=absolute_floor)) {
       if (sprite->graviting) {
         sprite->graviting=0;
         sprite->pvy=sprite->y;
-        if (sprite->type->fall_end) sprite->type->fall_end(sprite,sprite->gravclock);
+        if (sprite->type->fall_end) sprite->type->fall_end(sprite,sprite->gravclock,floor);
       } else {
         // Collision on a first-try for gravity: Forget we tried it.
         sprite->y=sprite->pvy;
@@ -272,6 +357,29 @@ int physics_teleport(struct sprite *sprite,double dx) {
         }
       }
     }
+    if (sprite->solid) {
+      double l=nx+sprite->phl;
+      double r=nx+sprite->phr;
+      double t=sprite->y+sprite->pht;
+      double b=sprite->y+sprite->phb;
+      struct sprite **p=g.spritev;
+      int i=g.spritec;
+      for (;i-->0;p++) {
+        struct sprite *other=*p;
+        if (!other->solid) continue;
+        if (other==sprite) continue;
+        double ol=other->x+other->phl;
+        double or=other->x+other->phr;
+        double ot=other->y+other->pht;
+        double ob=other->y+other->phb;
+        if (l>=or) continue;
+        if (r<=ol) continue;
+        if (t>=ob) continue;
+        if (b<=ot) continue;
+        okpos=0;
+        goto _done_precheck_;
+      }
+    }
    _done_precheck_:;
   }
   
@@ -308,6 +416,39 @@ int physics_teleport(struct sprite *sprite,double dx) {
         }
       }
     }
+    if (sprite->solid) {
+      double l,r;
+      if (dx<0.0) {
+        l=nx+sprite->phl;
+        r=sprite->x+sprite->phr;
+      } else {
+        l=sprite->x+sprite->phl;
+        r=nx+sprite->phr;
+      }
+      double t=sprite->y+sprite->pht;
+      double b=sprite->y+sprite->phb;
+      struct sprite **p=g.spritev;
+      int i=g.spritec;
+      for (;i-->0;p++) {
+        struct sprite *other=*p;
+        if (!other->solid) continue;
+        if (other==sprite) continue;
+        double ot=other->y+other->pht;
+        double ob=other->y+other->phb;
+        if ((t>=ob)||(b<=ot)) continue;
+        double ol=other->x+other->phl;
+        double or=other->x+other->phr;
+        if (l>=or) continue;
+        if (r<=ol) continue;
+        if (dx<0.0) {
+          l=or;
+          nx=l-sprite->phl;
+        } else {
+          r=ol;
+          nx=r-sprite->phr;
+        }
+      }
+    }
   }
   
   // If we've backed up beyond the minimum threshold, forget it.
@@ -339,5 +480,6 @@ int physics_check_point(double x,double y) {
     case NS_physics_solid:
       return 1;
   }
+  // This is currently only used for walljump and wallgrab. I can live without sprite-on-sprite collisions.
   return 0;
 }

@@ -67,17 +67,18 @@ Gather flowers of various colors and get scored based on count and color balance
 - [x] It's still possible to finish a walljump and end up walking backward (facing the wall). Did it twice but can't reproduce reliably.
 - - REPRO: Turn around as you press walljump, and release jump immediately.
 - [ ] Hazards and challenges. Nothing actually harmful, I don't want HP or even die-and-respawn. But things that knock you back, paralyze you...
-- - [ ] Things to break by fastfalling.
-- - [ ] A few flowers that become unreachable after fastfall-breaking something, have to pick them before.
-- - [ ] Walljump across a 1-meter outcrop.
-- - [ ] 2-meter outcrop? It's possible but very difficult.
+- - [x] Things to break by fastfalling.
+- - [x] A few flowers that become unreachable after fastfall-breaking something, have to pick them before.
+- - - We can probably do this with a squishroom: Put a oneway platform 5 meters above it that could only be reached by jumping from the squishroom.
+- - [x] Walljump across a 1-meter outcrop.
+- - [x] 2-meter outcrop? It's possible but very difficult.
 - - [ ] Goat that eats flowers if you wake him up.
 - - [ ] Monkey that grabs your back and restricts jumping.
 - - [ ] Treadle-triggered flamethrower, burns the flowers.
 - - [ ] Crush-o-matic, forces you to the edge you entered from.
 - - [ ] Elevator that drops when you hold a treadle. Must fastfall after it to reach the next level.
 - - [ ] Can we arrange a challenge that requires you to interrupt a fastfall?
-- - [ ] Short platforms high up. No new tech required.
+- - [x] Short platforms high up. Far enough apart that eventually you can't make it without teleporting! ...already ready
 - [ ] Proper maps.
 - - [ ] Each of the 6 outer maps should be split into pre- and post-challenge. No more than 9 flowers post-challenge, so as long as you enter fresh, you won't need to enter twice.
 - - [ ] Can I make 6 different regional graphics variations?

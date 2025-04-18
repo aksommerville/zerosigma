@@ -49,6 +49,8 @@ struct session {
     int rule; // Index in strings:1 (6..10). Only 6 and 7 are valid, and will be accompanied by a nonzero score.
   } summaryv[DAYC];
   int summaryc;
+  
+  uint8_t flagv[NS_flag_COUNT];
 };
 
 int session_reset();
@@ -56,5 +58,9 @@ int session_reset();
 int session_flowerp_by_flowerid(int flowerid);
 int session_flowerp_by_mapid(int mapid); // => Position of first flower for this map, never OOB.
 int session_flowerp_by_location(int mapid,int x,int y); // => Position or -1, not insertion  point.
+
+int session_get_flag(int flagid);
+void session_set_flag(int flagid,int v);
+//TODO listen to flags
 
 #endif

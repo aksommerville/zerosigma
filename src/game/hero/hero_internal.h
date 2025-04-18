@@ -57,7 +57,7 @@ struct sprite_hero {
 #define SPRITE ((struct sprite_hero*)sprite)
 
 void hero_fall_begin(struct sprite *sprite);
-void hero_fall_end(struct sprite *sprite,double duration);
+void hero_fall_end(struct sprite *sprite,double duration,struct sprite *floor);
 
 void hero_begin_echo(struct sprite *sprite,int framec);
 

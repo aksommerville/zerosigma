@@ -1,3 +1,4 @@
 image image:sprites
 tile 0x00 0x00
 sprctl (u16:sprctl)hero
+solid

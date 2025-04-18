@@ -42,7 +42,7 @@ struct sprite_type {
   
   // Physics notifications.
   void (*fall_begin)(struct sprite *sprite);
-  void (*fall_end)(struct sprite *sprite,double duration); // (duration) in seconds
+  void (*fall_end)(struct sprite *sprite,double duration,struct sprite *floor); // (duration) in seconds. (floor) only if we landed on a sprite.
   
   // Only relevant to the hero. Other sprites don't survive transitions.
   void (*map_changed)(struct sprite *sprite);
@@ -79,5 +79,7 @@ void hero_button_down(struct sprite *sprite,int btnid);
 void hero_button_up(struct sprite *sprite,int btnid);
 
 void sprite_flower_remove_by_flowerid(int flowerid);
+
+void squishroom_compress(struct sprite *sprite);
 
 #endif

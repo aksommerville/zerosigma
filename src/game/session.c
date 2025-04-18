@@ -81,6 +81,8 @@ static void session_reset_flowers() {
  
 int session_reset() {
   memset(&g.session,0,sizeof(struct session));
+  g.session.flagv[NS_flag_zero]=0;
+  g.session.flagv[NS_flag_one]=1;
   session_reset_flowers();
   return 0;
 }
@@ -134,4 +136,20 @@ int session_flowerp_by_location(int mapid,int x,int y) {
     else return ck;
   }
   return -1;
+}
+
+/* Flags.
+ */
+ 
+int session_get_flag(int flagid) {
+  if ((flagid<0)||(flagid>=NS_flag_COUNT)) return 0;
+  return g.session.flagv[flagid];
+}
+
+void session_set_flag(int flagid,int v) {
+  if ((flagid<2)||(flagid>=NS_flag_COUNT)) return; // sic 2: Flags zero and one are not allowed to change.
+  v&=0xff;
+  if (g.session.flagv[flagid]==v) return;
+  g.session.flagv[flagid]=v;
+  //TODO Notify listeners
 }
