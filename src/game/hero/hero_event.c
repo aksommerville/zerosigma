@@ -106,6 +106,11 @@ static int hero_check_ladder(struct sprite *sprite) {
   return 1;
 }
 
+void hero_rejoin_ladder(struct sprite *sprite) {
+  if (SPRITE->indy>=0) return;
+  hero_check_ladder(sprite);
+}
+
 /* Pick flower.
  */
  
@@ -280,6 +285,7 @@ static void hero_jump_end(struct sprite *sprite) {
     sprite->gravity=0.0;
   }
   sprite->suspend_gravity=0;
+  hero_rejoin_ladder(sprite);
 }
 
 /* Item input.

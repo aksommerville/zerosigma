@@ -62,7 +62,12 @@ Gather flowers of various colors and get scored based on count and color balance
 - [x] Episodes.
 - [x] Scoring.
 - [ ] Use `n*m` instead of `n**m`. Daily score in 5..45. But at 45, bonus-bump it to 100.
-- [ ] Hazards. Nothing actually harmful, I don't want HP or even die-and-respawn. But things that knock you back, paralyze you...
+- [ ] Hazards and challenges. Nothing actually harmful, I don't want HP or even die-and-respawn. But things that knock you back, paralyze you...
+- - [ ] Things to break by fastfalling.
+- - [ ] A few flowers that become unreachable after fastfall-breaking something, have to pick them before.
+- - [ ] Walljump across a 1-meter outcrop.
+- - [ ] 2-meter outcrop? It's possible but very difficult.
+- - [ ] Goat that eats flowers if you wake him up.
 - [ ] Proper maps.
 - [ ] Sound effects.
 - [ ] Menus.
@@ -75,5 +80,5 @@ Gather flowers of various colors and get scored based on count and color balance
 - - "Zero Sigma" makes even less sense now that I've decided not to involve either sum or standard deviation in the formula.
 - - "Tidy Garden"? "Magic Garden"?
 - - Day-end songs should have a much shorter lead-in.
-- [ ] Recheck ladder at the peak of a jump, if Y axis nonzero. So you can jump up a ladder instead of climbing, without having to release and re-press Up.
+- [x] Recheck ladder at the peak of a jump, if Y axis nonzero. So you can jump up a ladder instead of climbing, without having to release and re-press Up.
 - [x] Use Up instead of Down for picking.

@@ -216,7 +216,7 @@ int physics_downjump(struct sprite *sprite) {
   if (row<0) return 0;
   if (row>=g.scene.map->h) return 0;
   
-  // Each cell under the sprite, on that row, must have physics vacant or oneway. OOB is ok.
+  // Each cell under the sprite, on that row, must have physics vacant, oneway, or ladder. OOB is ok.
   // At least one must be oneway.
   int cola=(int)(sprite->x+sprite->phl+SPACE_FUDGE); if (cola<0) cola=0;
   int colz=(int)(sprite->x+sprite->phr-SPACE_FUDGE); if (colz>=g.scene.map->w) colz=g.scene.map->w-1;
@@ -227,6 +227,7 @@ int physics_downjump(struct sprite *sprite) {
     switch (physics) {
       case NS_physics_oneway: oneway=1; // pass
       case NS_physics_vacant:
+      case NS_physics_ladder:
         break;
       default: return 0;
     }

@@ -58,4 +58,7 @@ void hero_fall_end(struct sprite *sprite,double duration);
 
 void hero_begin_echo(struct sprite *sprite,int framec);
 
+// Call as a jump crests. We'll check the Y axis and if it's Up and we're near a ladder, we'll grab the ladder.
+void hero_rejoin_ladder(struct sprite *sprite);
+
 #endif

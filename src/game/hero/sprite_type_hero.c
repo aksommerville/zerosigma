@@ -105,6 +105,7 @@ static void hero_update_jump(struct sprite *sprite,double elapsed) {
       SPRITE->jump_power=0.0;
       if (SPRITE->indx<0) sprite->xform=EGG_XFORM_XREV;
       else if (SPRITE->indx>0) sprite->xform=0;
+      hero_rejoin_ladder(sprite);
       return;
     }
     sprite->y-=SPRITE->walljump_ypower*elapsed;
@@ -115,6 +116,7 @@ static void hero_update_jump(struct sprite *sprite,double elapsed) {
   SPRITE->jump_power-=elapsed*HERO_JUMP_POWER_DECELERATION;
   if (SPRITE->jump_power<=0.0) {
     sprite->suspend_gravity=0;
+    hero_rejoin_ladder(sprite);
     return;
   }
   sprite->y-=SPRITE->jump_power*elapsed;
