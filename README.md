@@ -38,7 +38,7 @@ Gather flowers of various colors and get scored based on count and color balance
   W 2025-04-16: Map connections, ladders, earthquake, echo. Grow flowers.
   R 2025-04-17: Scorekeeping, customers. More music.
   F 2025-04-18: Teleport, squishroom, goat, treadle, flamethrower.
-  S 2025-04-19: Sound effects
+  S 2025-04-19: Sound effects, revised music
   U 2025-04-20
   M 2025-04-21
   T 2025-04-22
@@ -98,7 +98,7 @@ Gather flowers of various colors and get scored based on count and color balance
 - - Five valid bouquets.
 - - Five perfect bouquets.
 - - Bonus tokens to collect?
-- [ ] Change the music. `cosmic_balance` is too melancholy and `petal_to_the_metal` is too heroic. They should be fun and silly.
+- [x] Change the music. `cosmic_balance` is too melancholy and `petal_to_the_metal` is too heroic. They should be fun and silly.
 - - Save `petal_to_the_metal` for something else, it's a great tune.
 - - ...actually I'm not sure. I really do like PTTM. Prioritize the others, maybe keep this.
 - - Day-end songs should have a much shorter lead-in.
@@ -108,3 +108,4 @@ Gather flowers of various colors and get scored based on count and color balance
 - - "Dot's Wicked Garden". Colorful Flowers & Black Magic, A Perfect Balance In Every Bouquet!
 - [x] Recheck ladder at the peak of a jump, if Y axis nonzero. So you can jump up a ladder instead of climbing, without having to release and re-press Up.
 - [x] Use Up instead of Down for picking.
+- [ ] Seems like the SE room (test maps) is usually getting the same color for all flowers. And these are the very end of the list. Is something wrong with the RNG at flower placement?
