@@ -32,6 +32,7 @@ int egg_client_init() {
   //TODO main menu
   if (session_reset()<0) return -1;//XXX should be main menu's problem
   if (!zs_layer_spawn_play()) return -1;//XXX
+  //if (!zs_layer_spawn_dayend()) return -1;//XXX
   
   return 0;
 }

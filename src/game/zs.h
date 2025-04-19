@@ -34,6 +34,7 @@ extern struct g {
   int bgimageid; // Ignore what's stored in the maps; they all must use the same image.
   int texid_bg;
   int texid_sprites;
+  int texid_uibits;
   
   // zs_layer.c
   struct zs_layer **layerv;

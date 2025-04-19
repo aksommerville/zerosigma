@@ -108,4 +108,6 @@ Gather flowers of various colors and get scored based on count and color balance
 - - "Dot's Wicked Garden". Colorful Flowers & Black Magic, A Perfect Balance In Every Bouquet!
 - [x] Recheck ladder at the peak of a jump, if Y axis nonzero. So you can jump up a ladder instead of climbing, without having to release and re-press Up.
 - [x] Use Up instead of Down for picking.
-- [ ] Seems like the SE room (test maps) is usually getting the same color for all flowers. And these are the very end of the list. Is something wrong with the RNG at flower placement?
+- [x] Seems like the SE room (test maps) is usually getting the same color for all flowers. And these are the very end of the list. Is something wrong with the RNG at flower placement?
+- - Reviewed a little closer and yes, it does seem to be noticeably eccentric at least half the time.
+- - We were selecting a color based on all available colors, regardless of how many remain. Easy change to pick among the total remaining *flowers* rather than *colors*.

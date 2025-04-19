@@ -49,14 +49,12 @@ static void session_reset_flowers() {
         }
         
         int range=0,i=0;
-        for (;i<COLORC;i++) if (remaining_by_color[i]) range++;
+        for (;i<COLORC;i++) range+=remaining_by_color[i];
         if (!range) return;
         int choice=rand()%range;
         int colorid=0;
         for (i=0;i<COLORC;i++) {
-          if (!remaining_by_color[i]) continue;
-          if (!choice--) {
-            remaining_by_color[i]--;
+          if ((choice-=remaining_by_color[i])<0) {
             colorid=i;
             break;
           }

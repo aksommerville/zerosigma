@@ -265,6 +265,8 @@ int zs_res_init() {
   if (egg_texture_load_image(g.texid_bg,g.bgimageid)<0) return -1;
   if (!g.texid_sprites&&((g.texid_sprites=egg_texture_new())<1)) return -1;
   if (egg_texture_load_image(g.texid_sprites,RID_image_sprites)<0) return -1;
+  if (!g.texid_uibits&&((g.texid_uibits=egg_texture_new())<1)) return -1;
+  if (egg_texture_load_image(g.texid_uibits,RID_image_uibits)<0) return -1;
   
   if (zs_res_populate_doors()<0) return -1;
   
