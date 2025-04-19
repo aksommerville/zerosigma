@@ -12,6 +12,7 @@ PROJNAME:=zerosigma
 PROJRDNS:=com.aksommerville.egggame.zerosigma
 ENABLE_SERVER_AUDIO:=
 BUILDABLE_DATA_TYPES:=
+NATIVE_RUN_ARGS:=--audio=pulse
 
 ifndef EGG_SDK
   EGG_SDK:=/home/andy/proj/egg

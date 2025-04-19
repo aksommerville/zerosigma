@@ -37,8 +37,8 @@ Gather flowers of various colors and get scored based on count and color balance
   T 2025-04-15: Music refined, home map cleaned up, fastfall, wallgrab.
   W 2025-04-16: Map connections, ladders, earthquake, echo. Grow flowers.
   R 2025-04-17: Scorekeeping, customers. More music.
-  F 2025-04-18: Teleport, squishroom, goat, treadle
-  S 2025-04-19
+  F 2025-04-18: Teleport, squishroom, goat, treadle, flamethrower.
+  S 2025-04-19: Sound effects
   U 2025-04-20
   M 2025-04-21
   T 2025-04-22
@@ -88,7 +88,7 @@ Gather flowers of various colors and get scored based on count and color balance
 - - - [ ] City
 - - - [ ] Prairie
 - - - [ ] Graveyard
-- [ ] Sound effects.
+- [x] Sound effects.
 - [ ] Menus.
 - - [ ] Hello
 - - [ ] Game over
@@ -100,6 +100,7 @@ Gather flowers of various colors and get scored based on count and color balance
 - - Bonus tokens to collect?
 - [ ] Change the music. `cosmic_balance` is too melancholy and `petal_to_the_metal` is too heroic. They should be fun and silly.
 - - Save `petal_to_the_metal` for something else, it's a great tune.
+- - ...actually I'm not sure. I really do like PTTM. Prioritize the others, maybe keep this.
 - - Day-end songs should have a much shorter lead-in.
 - [x] Change the title.
 - - "Zero Sigma" makes even less sense now that I've decided not to involve either sum or standard deviation in the formula.
