@@ -132,6 +132,10 @@ struct zs_layer *zs_layer_spawn_dayend() {
   layer->update=_dayend_update;
   layer->render=_dayend_render;
   
+  // Arguably not our problem, but the creation of a dayend layer is a good signal that sprites should be dropped.
+  // This must be done at some point before session_reset().
+  sprites_drop();
+  
   // Add blank summary to the session.
   if (g.session.summaryc>=DAYC) {
     layer->defunct=1;

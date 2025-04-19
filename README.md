@@ -1,4 +1,4 @@
-# Zero Sigma Florist
+# Dot's Wicked Garden
 
 Requires [Egg](https://github.com/aksommerville/egg) to build.
 
@@ -101,8 +101,9 @@ Gather flowers of various colors and get scored based on count and color balance
 - [ ] Change the music. `cosmic_balance` is too melancholy and `petal_to_the_metal` is too heroic. They should be fun and silly.
 - - Save `petal_to_the_metal` for something else, it's a great tune.
 - - Day-end songs should have a much shorter lead-in.
-- [ ] Change the title.
+- [x] Change the title.
 - - "Zero Sigma" makes even less sense now that I've decided not to involve either sum or standard deviation in the formula.
 - - "Tidy Garden"? "Magic Garden"? "Ninja Garden", if Dot was a ninja instead of a witch.
+- - "Dot's Wicked Garden". Colorful Flowers & Black Magic, A Perfect Balance In Every Bouquet!
 - [x] Recheck ladder at the peak of a jump, if Y axis nonzero. So you can jump up a ladder instead of climbing, without having to release and re-press Up.
 - [x] Use Up instead of Down for picking.

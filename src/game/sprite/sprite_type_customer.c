@@ -16,6 +16,7 @@ struct sprite_customer {
   uint8_t tileid0;
   int texid_bouquet; // Size is always NS_sys_tilesize**2.
   int bouquetc; // (session.bouquetc) sampled at the time we draw the preview, for change detection.
+  double initial_blackout;
 };
 
 #define SPRITE ((struct sprite_customer*)sprite)
@@ -36,6 +37,7 @@ static int _customer_init(struct sprite *sprite) {
   sprite->layer=101;
   sprite->tileid=0x70+g.session.summaryc*2;
   SPRITE->tileid0=sprite->tileid;
+  SPRITE->initial_blackout=0.750;
   return 0;
 }
 
@@ -127,8 +129,9 @@ static void customer_require_bouquet(struct sprite *sprite) {
  */
  
 static void _customer_update(struct sprite *sprite,double elapsed) {
+  if (SPRITE->initial_blackout>0.0) SPRITE->initial_blackout-=elapsed;
   struct sprite *hero=scene_get_hero();
-  if (!hero) {
+  if (!hero||(SPRITE->initial_blackout>0.0)) {
     customer_dialogue_none(sprite);
   } else {
     double dx=hero->x-sprite->x;
