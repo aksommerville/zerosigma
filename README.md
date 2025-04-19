@@ -37,7 +37,7 @@ Gather flowers of various colors and get scored based on count and color balance
   T 2025-04-15: Music refined, home map cleaned up, fastfall, wallgrab.
   W 2025-04-16: Map connections, ladders, earthquake, echo. Grow flowers.
   R 2025-04-17: Scorekeeping, customers. More music.
-  F 2025-04-18: Teleport.
+  F 2025-04-18: Teleport, squishroom, goat, treadle
   S 2025-04-19
   U 2025-04-20
   M 2025-04-21
@@ -74,7 +74,7 @@ Gather flowers of various colors and get scored based on count and color balance
 - - [x] 2-meter outcrop? It's possible but very difficult.
 - - [x] Goat that eats flowers if you wake him up.
 - - [ ] Monkey that grabs your back and restricts jumping.
-- - [ ] Treadle-triggered flamethrower, burns the flowers.
+- - [x] Treadle-triggered flamethrower, burns the flowers.
 - - [ ] Crush-o-matic, forces you to the edge you entered from.
 - - [ ] Elevator that drops when you hold a treadle. Must fastfall after it to reach the next level.
 - - [ ] Can we arrange a challenge that requires you to interrupt a fastfall?

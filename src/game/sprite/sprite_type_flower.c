@@ -18,6 +18,7 @@ struct sprite_flower {
 static int _flower_init(struct sprite *sprite) {
   sprite->layer=50;
   sprite->terminal_velocity=0.0;
+  sprite->fragile=1;
   int p=session_flowerp_by_flowerid(sprite->arg);
   if (p<0) return -1;
   const struct session_flower *flower=g.session.flowerv+p;

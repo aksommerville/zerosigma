@@ -341,3 +341,37 @@ void hero_button_up(struct sprite *sprite,int btnid) {
     case EGG_BTN_WEST: if (!SPRITE->initem) return; SPRITE->initem=0; break;
   }
 }
+
+/* Hurt.
+ */
+ 
+void hero_hurt(struct sprite *sprite,struct sprite *assailant) {
+  SPRITE->sorefoot=0.250;
+  SPRITE->autoclock=0.125;
+  SPRITE->autodx=SPRITE->autody=0.0;
+  sprite->suspend_gravity=1;
+  sprite->gravity=0.0;
+  egg_play_sound(RID_sound_hurt);
+  if (assailant) {
+    if (assailant->type==&sprite_type_flamethrower) {
+      const double speed=24.0;
+      if (assailant->arg&0x00f00000) { // horizontal
+        if (sprite->y<assailant->y) {
+          sprite->y=assailant->y+assailant->pht-sprite->phb;
+          SPRITE->autody=-speed;
+        } else {
+          sprite->y=assailant->y+assailant->phb-sprite->pht;
+          SPRITE->autody=speed;
+        }
+      } else { // vertical
+        if (sprite->x<assailant->x) {
+          sprite->x=assailant->x+assailant->phl-sprite->phr;
+          SPRITE->autodx=-speed;
+        } else {
+          sprite->x=assailant->x+assailant->phr-sprite->phl;
+          SPRITE->autodx=speed;
+        }
+      }
+    }
+  }
+}

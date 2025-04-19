@@ -1,0 +1,4 @@
+image image:sprites
+tile 0x59 0
+sprctl (u16:sprctl)flamethrower
+solid

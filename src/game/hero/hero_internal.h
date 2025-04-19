@@ -39,6 +39,8 @@ struct sprite_hero {
   int seated;
   double ladderx; // >0.0, center of ladder column, if we're climbing.
   double teleport_highlight; // Counts down after a teleport.
+  double autoclock; // Motion eg when injured.
+  double autodx,autody; // m/s
   
   struct hero_echo {
     double x,y;
@@ -63,5 +65,7 @@ void hero_begin_echo(struct sprite *sprite,int framec);
 
 // Call as a jump crests. We'll check the Y axis and if it's Up and we're near a ladder, we'll grab the ladder.
 void hero_rejoin_ladder(struct sprite *sprite);
+
+void hero_hurt(struct sprite *sprite,struct sprite *assailant);
 
 #endif

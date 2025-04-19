@@ -39,3 +39,8 @@ door @15,29 map:s @15,0 0x0000
 door @49,24 map:se @0,18 0x0000
 sprite @48,13 sprite:customer 0x00000000
 sprite @27,27 sprite:goat 0x00000000
+sprite @39,27 sprite:treadle (u8:flag)flame1 0x000000
+sprite @46,27 sprite:flamethrower (u8:flag)flame1 0x0c0000
+sprite @33,25 sprite:flamethrower (u8:flag)flame1 0x401400
+sprite @41,22 sprite:flamethrower (u8:flag)flame1 0x040000
+sprite @36,19 sprite:flamethrower (u8:flag)flame1 0xc00400

@@ -75,6 +75,7 @@ static void sprite_read_generic_commands(struct sprite *sprite) {
   while (rom_command_reader_next(&cmd,&reader)>0) {
     switch (cmd.opcode) {
       case CMD_sprite_solid: sprite->solid=1; break;
+      case CMD_sprite_fragile: sprite->fragile=1; break;
       case CMD_sprite_tile: {
           sprite->tileid=cmd.argv[0];
           sprite->xform=cmd.argv[1];
@@ -102,6 +103,7 @@ static const struct sprite_type *sprite_type_from_commands(const void *src,int s
 static struct sprite *sprite_spawn_finish(struct sprite *sprite) {
   if (!sprite) return 0;
   if (sprite->type->init&&(sprite->type->init(sprite)<0)) {
+    fprintf(stderr,"Error initializing sprite of type '%s', arg=0x%08x\n",sprite->type->name,sprite->arg);
     sprite_del(sprite);
     return 0;
   }

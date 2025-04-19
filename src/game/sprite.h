@@ -22,6 +22,7 @@ struct sprite {
   uint32_t physics_mask; // Which physics values are solid to me, eg (1<<NS_physics_solid).
   int defunct;
   int layer; // Render order within a layer is undefined. Hero is 100, flowers are 50.
+  int fragile; // Subject to burnination.
   
   // Private to physics:
   int graviting;
@@ -49,6 +50,8 @@ struct sprite_type {
   
   // Epicenter is the hero's position, where she hit the ground. All sprites that implement this get notified each time.
   void (*earthquake)(struct sprite *sprite,double epix,double epiy);
+  
+  void (*hurt)(struct sprite *sprite,struct sprite *assailant);
 };
 
 /* Plain sprite_new() DOES NOT call (type->init).

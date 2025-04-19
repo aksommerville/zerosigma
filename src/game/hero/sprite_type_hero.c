@@ -216,6 +216,17 @@ static void _hero_update(struct sprite *sprite,double elapsed) {
     SPRITE->teleport_highlight=0.0;
   }
   
+  if (SPRITE->autoclock>0.0) {
+    if ((SPRITE->autoclock-=elapsed)<=0.0) {
+      sprite->suspend_gravity=0;
+    } else {
+      sprite->x+=SPRITE->autodx*elapsed;
+      sprite->y+=SPRITE->autody*elapsed;
+      return;
+    }
+  }
+    
+  
   if (SPRITE->ladderx>0.0) {
     hero_update_ladder(sprite,elapsed);
     return;
@@ -387,6 +398,7 @@ const struct sprite_type sprite_type_hero={
   .fall_begin=hero_fall_begin,
   .fall_end=hero_fall_end,
   .map_changed=_hero_map_changed,
+  .hurt=hero_hurt,
 };
 
 /* Begin echo.

@@ -51,6 +51,16 @@ struct session {
   int summaryc;
   
   uint8_t flagv[NS_flag_COUNT];
+  
+  struct flag_listener {
+    int listenerid;
+    int flagid;
+    void (*cb)(int flagid,int v,void *userdata);
+    void *userdata;
+  } *flag_listenerv;
+  int flag_listenerc,flag_listenera;
+  int flag_listener_next;
+  int broadcast_in_progress;
 };
 
 int session_reset();
@@ -59,8 +69,14 @@ int session_flowerp_by_flowerid(int flowerid);
 int session_flowerp_by_mapid(int mapid); // => Position of first flower for this map, never OOB.
 int session_flowerp_by_location(int mapid,int x,int y); // => Position or -1, not insertion  point.
 
+/* Flags zero and one never change.
+ * You can listen on a negative flagid to receive all changes.
+ * You must clean up any listener you create.
+ * It is an error to add a new listener during a callback.
+ */
 int session_get_flag(int flagid);
 void session_set_flag(int flagid,int v);
-//TODO listen to flags
+int session_listen_flag(int flagid,void (*cb)(int flagid,int v,void *userdata),void *userdata); // => listenerid
+void session_unlisten_flag(int listenerid);
 
 #endif
