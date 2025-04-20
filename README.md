@@ -39,7 +39,7 @@ Gather flowers of various colors and get scored based on count and color balance
   R 2025-04-17: Scorekeeping, customers. More music.
   F 2025-04-18: Teleport, squishroom, goat, treadle, flamethrower.
   S 2025-04-19: Sound effects, revised music, started dayend animations in earnest.
-  U 2025-04-20: Dayend animations complete.
+  U 2025-04-20: Dayend animations complete. Map layouts.
   M 2025-04-21
   T 2025-04-22
   W 2025-04-23

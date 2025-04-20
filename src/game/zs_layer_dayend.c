@@ -46,7 +46,7 @@ static void _dayend_update(struct zs_layer *layer,double elapsed,int input,int p
     } else {
       layer->defunct=1;
       if (g.session.summaryc>=DAYC) {
-        zs_layer_spawn_gameover();
+        zs_layer_spawn_hello();
       } else {
         scene_reset();
       }

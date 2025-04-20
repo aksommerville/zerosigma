@@ -27,6 +27,7 @@ struct zs_layer *zs_layers_get_focus();
  */
 struct zs_layer *zs_layer_spawn_play();
 struct zs_layer *zs_layer_spawn_dayend();
-struct zs_layer *zs_layer_spawn_gameover();
+struct zs_layer *zs_layer_spawn_gameover();//XXX Have hello do all the gameover stuff
+struct zs_layer *zs_layer_spawn_hello();
 
 #endif
