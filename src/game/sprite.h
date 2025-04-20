@@ -90,4 +90,7 @@ void squishroom_compress(struct sprite *sprite);
 
 void snore_drop_all();
 
+// Any flamethrower. And we tolerate (r<l) by reversing them.
+int flamethrower_touches_box(double l,double t,double r,double b);
+
 #endif

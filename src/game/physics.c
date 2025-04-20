@@ -339,6 +339,9 @@ int physics_teleport(struct sprite *sprite,double dx) {
     nx=g.scene.map->w-sprite->phr;
   }
   
+  // If there's fire in the telebox, forget it.
+  if (flamethrower_touches_box(ox,sprite->y+sprite->pht,nx,sprite->y+sprite->phb)) return 0;
+  
   // First check the map only on the target bounds. If that position is legal, great.
   // Without this clause, Dot would not be able to teleport thru narrow walls. (we do want her to)
   int okpos=1;

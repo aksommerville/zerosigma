@@ -79,19 +79,19 @@ Gather flowers of various colors and get scored based on count and color balance
 - - [ ] Elevator that drops when you hold a treadle. Must fastfall after it to reach the next level.
 - - [ ] Can we arrange a challenge that requires you to interrupt a fastfall?
 - - [x] Short platforms high up. Far enough apart that eventually you can't make it without teleporting! ...already ready
-- [ ] Proper maps.
-- - [ ] Each of the 6 outer maps should be split into pre- and post-challenge. No more than 9 flowers post-challenge, so as long as you enter fresh, you won't need to enter twice.
+- [x] Proper maps.
+- - [x] Each of the 6 outer maps should be split into pre- and post-challenge. No more than 9 flowers post-challenge, so as long as you enter fresh, you won't need to enter twice.
 - - - Or should we add more logic to flower placement, to make even tighter constraints?
 - - - Keep in mind that there are 6 outer maps, but only 5 customers.
 - - - Home map must introduce walljump and downjump.
 - - - Flowers: 9*6 post-challenge, 19*6 pre-challenge, 57 home.
 - - - Six challenges:
-- - - - [ ] Teleport-jump to narrow platforms.
-- - - - [ ] Don't squish the mushroom yet.
-- - - - [ ] Fastfall to slip past a flamethrower, and there's a goat below.
-- - - - [ ] Walljump over 1-meter outcrop.
-- - - - [ ] Make the goat press a button.
-- - - - [ ] Teleport thru a pillar.
+- - - - [x] Teleport-jump to narrow platforms. nw
+- - - - [x] Don't squish the mushroom yet. n
+- - - - [x] Fastfall to slip past a flamethrower, and there's a goat below. ne
+- - - - [x] Walljump over 1-meter outcrop. sw
+- - - - [x] Make the goat press a button. s
+- - - - [x] Teleport thru a pillar. se
 - - [ ] Can I make 6 different regional graphics variations?
 - - - [ ] Forest
 - - - [ ] Desert

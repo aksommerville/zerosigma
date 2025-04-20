@@ -50,7 +50,9 @@
 // Flags zero and one have constant values; they can't be changed.
 #define NS_flag_zero 0
 #define NS_flag_one 1
-#define NS_flag_flame1 2
-#define NS_flag_COUNT 3
+#define NS_flag_nsquishroom 2
+#define NS_flag_neflame 3
+#define NS_flag_sflame 4
+#define NS_flag_COUNT 5
 
 #endif

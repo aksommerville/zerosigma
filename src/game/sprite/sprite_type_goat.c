@@ -52,7 +52,7 @@ static void goat_measure_bounds(struct sprite *sprite) {
   int colc=1;
   while ((col>0)&&goat_tile_vacant(sprite,p[-1])&&goat_tile_floor(sprite,p[g.scene.map->w-1])) { col--; colc++; p--; }
   p+=colc;
-  while ((col+colc<g.scene.map->w)&&goat_tile_vacant(sprite,p[0])&&goat_tile_floor(sprite,p[g.scene.map->w+1])) { colc++; p++; }
+  while ((col+colc<g.scene.map->w)&&goat_tile_vacant(sprite,p[0])&&goat_tile_floor(sprite,p[g.scene.map->w])) { colc++; p++; }
   SPRITE->xlo=col+0.5;
   SPRITE->xhi=col+colc-0.5;
 }

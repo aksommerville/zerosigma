@@ -168,3 +168,46 @@ const struct sprite_type sprite_type_flamethrower={
   .update=_flamethrower_update,
   .render=_flamethrower_render,
 };
+
+int flamethrower_touches_box(double l,double t,double r,double b) {
+  if (l>r) {
+    double tmp=l;
+    l=r;
+    r=tmp;
+  }
+  if (t>b) {
+    double tmp=t;
+    t=b;
+    b=tmp;
+  }
+  struct sprite **p=g.spritev;
+  int i=g.spritec;
+  for (;i-->0;p++) {
+    struct sprite *sprite=*p;
+    if (sprite->type!=&sprite_type_flamethrower) continue;
+    if (!SPRITE->state) continue;
+    double sl=sprite->x+sprite->phl;
+    double sr=sprite->x+sprite->phr;
+    double st=sprite->y+sprite->pht;
+    double sb=sprite->y+sprite->phb;
+    if (SPRITE->rangex<0) {
+      sl=sprite->x+SPRITE->rangex;
+      sr=sprite->x;
+    } else if (SPRITE->rangex>0) {
+      sl=sprite->x;
+      sr=sprite->x+SPRITE->rangex;
+    } else if (SPRITE->rangey<0) {
+      st=sprite->y+SPRITE->rangey;
+      sb=sprite->y;
+    } else if (SPRITE->rangey>0) {
+      st=sprite->y;
+      sb=sprite->y+SPRITE->rangey;
+    }
+    if (sl>=r) continue;
+    if (sr<=l) continue;
+    if (st>=b) continue;
+    if (sb<=t) continue;
+    return 1;
+  }
+  return 0;
+}
