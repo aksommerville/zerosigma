@@ -61,6 +61,8 @@ struct session {
   int flag_listenerc,flag_listenera;
   int flag_listener_next;
   int broadcast_in_progress;
+  
+  int mapchangec; // For detecting the don't-leave-home achievement.
 };
 
 int session_reset();

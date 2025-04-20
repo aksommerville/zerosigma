@@ -2,11 +2,17 @@
  * This exists only to be overridden by games' editors.
  */
  
+import { Data } from "../js/Data.js";
+import { Dom } from "../js/Dom.js";
+import { MapRes } from "../js/map/MapRes.js";
+ 
 export class Custom {
   static getDependencies() {
-    return [];
+    return [Data, Dom];
   }
-  constructor() {
+  constructor(data, dom) {
+    this.data = data;
+    this.dom = dom;
   }
   
   /* Return an array of {
@@ -17,7 +23,9 @@ export class Custom {
    * Return in the order you want them to appear. Custom actions come before standard ones in the menu.
    */
   getActions() {
-    return [];
+    return [
+      { op: "flowersByMap", label: "Flowers by map", fn: () => this.flowersByMap() },
+    ];
   }
   
   /* Array of class implementing:
@@ -43,6 +51,32 @@ export class Custom {
    */
   renderMapEditorAnnotation(annotation, command, map) {
     return null;
+  }
+  
+  /* Begin custom code.
+   *************************************************************************************************/
+   
+  flowersByMap() {
+    let report = "";
+    let total = 0;
+    for (const res of this.data.resv) {
+      if (res.type !== "map") continue;
+      try {
+        const map = new MapRes(res.serial);
+        let flowerc = 0;
+        for (let i=map.v.length; i-->0; ) {
+          if ((map.v[i] >= 0x05) && (map.v[i] <= 0x08)) {
+            flowerc++;
+          }
+        }
+        total += flowerc;
+        report += `${flowerc} ${res.path}\n`;
+      } catch (e) {
+        report += `${res.path}: ${e.message}\n`;
+      }
+    }
+    report += `${total} total`;
+    this.dom.modalMessage(report);
   }
 }
 

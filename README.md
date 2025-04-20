@@ -81,6 +81,17 @@ Gather flowers of various colors and get scored based on count and color balance
 - - [x] Short platforms high up. Far enough apart that eventually you can't make it without teleporting! ...already ready
 - [ ] Proper maps.
 - - [ ] Each of the 6 outer maps should be split into pre- and post-challenge. No more than 9 flowers post-challenge, so as long as you enter fresh, you won't need to enter twice.
+- - - Or should we add more logic to flower placement, to make even tighter constraints?
+- - - Keep in mind that there are 6 outer maps, but only 5 customers.
+- - - Home map must introduce walljump and downjump.
+- - - Flowers: 9*6 post-challenge, 19*6 pre-challenge, 57 home.
+- - - Six challenges:
+- - - - [ ] Teleport-jump to narrow platforms.
+- - - - [ ] Don't squish the mushroom yet.
+- - - - [ ] Fastfall to slip past a flamethrower, and there's a goat below.
+- - - - [ ] Walljump over 1-meter outcrop.
+- - - - [ ] Make the goat press a button.
+- - - - [ ] Teleport thru a pillar.
 - - [ ] Can I make 6 different regional graphics variations?
 - - - [ ] Forest
 - - - [ ] Desert
@@ -98,6 +109,7 @@ Gather flowers of various colors and get scored based on count and color balance
 - - Five valid bouquets.
 - - Five perfect bouquets.
 - - Bonus tokens to collect?
+- - Five valid bouquets without leaving home. (if there's >=45 on the home screen, it's always possible, and there's 57).
 - [x] Change the music. `cosmic_balance` is too melancholy and `petal_to_the_metal` is too heroic. They should be fun and silly.
 - - Save `petal_to_the_metal` for something else, it's a great tune.
 - - ...actually I'm not sure. I really do like PTTM. Prioritize the others, maybe keep this.

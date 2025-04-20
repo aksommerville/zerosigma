@@ -41,11 +41,15 @@ static void _dayend_del(struct zs_layer *layer) {
 static void _dayend_update(struct zs_layer *layer,double elapsed,int input,int pvinput) {
   LAYER->clock+=elapsed;
   if ((input&EGG_BTN_SOUTH)&&!(pvinput&EGG_BTN_SOUTH)) {
-    layer->defunct=1;
-    if (g.session.summaryc>=DAYC) {
-      zs_layer_spawn_gameover();
+    if (LAYER->clock<REVELATION_TIME) {
+      LAYER->clock=REVELATION_TIME+0.001;
     } else {
-      scene_reset();
+      layer->defunct=1;
+      if (g.session.summaryc>=DAYC) {
+        zs_layer_spawn_gameover();
+      } else {
+        scene_reset();
+      }
     }
   }
 }
@@ -507,25 +511,12 @@ struct zs_layer *zs_layer_spawn_dayend() {
   score_summary(summary);
   
   LAYER->customer=g.session.summaryc-1;
-  //LAYER->customer=4;//XXX
-  //summary->score=1;//XXX
   if (summary->score) {
     egg_play_song(RID_song_flowers_for_you_positive,0,0);
     LAYER->success=1;
   } else {
     egg_play_song(RID_song_flowers_for_you_negative,0,0);
     LAYER->success=0;
-  }
-  
-  //XXX Draw the bouquet if we don't have it yet. In real life, sprite_customer will never fail to do this before we exist.
-  if (!g.texid_bouquet) {
-    g.texid_bouquet=egg_texture_new();
-    egg_texture_load_raw(g.texid_bouquet,NS_sys_tilesize,NS_sys_tilesize,NS_sys_tilesize<<2,0,0);
-    egg_draw_clear(g.texid_bouquet,0);
-    graf_set_output(&g.graf,g.texid_bouquet);
-    graf_draw_tile(&g.graf,g.texid_sprites,NS_sys_tilesize>>1,NS_sys_tilesize>>1,0x25,0);
-    graf_set_output(&g.graf,0);
-    graf_flush(&g.graf);
   }
   
   // Generate labels.

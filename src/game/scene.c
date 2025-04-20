@@ -57,6 +57,7 @@ static int scene_load_map(int rid) {
   //fprintf(stderr,"%s: Loaded map:%d, %dx%d\n",__func__,rid,g.scene.map->w,g.scene.map->h);
   if (scene_apply_map_commands()<0) return -1;
   if (scene_grow_flowers()<0) return -1;
+  g.session.mapchangec++;
   return 0;
 }
 
