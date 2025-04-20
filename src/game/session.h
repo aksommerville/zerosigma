@@ -79,4 +79,6 @@ void session_set_flag(int flagid,int v);
 int session_listen_flag(int flagid,void (*cb)(int flagid,int v,void *userdata),void *userdata); // => listenerid
 void session_unlisten_flag(int listenerid);
 
+int session_calculate_score(); // Just the sum of summaryv[].score.
+
 #endif

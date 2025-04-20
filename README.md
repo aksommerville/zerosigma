@@ -38,8 +38,8 @@ Gather flowers of various colors and get scored based on count and color balance
   W 2025-04-16: Map connections, ladders, earthquake, echo. Grow flowers.
   R 2025-04-17: Scorekeeping, customers. More music.
   F 2025-04-18: Teleport, squishroom, goat, treadle, flamethrower.
-  S 2025-04-19: Sound effects, revised music
-  U 2025-04-20
+  S 2025-04-19: Sound effects, revised music, started dayend animations in earnest.
+  U 2025-04-20: Dayend animations complete.
   M 2025-04-21
   T 2025-04-22
   W 2025-04-23
@@ -92,7 +92,7 @@ Gather flowers of various colors and get scored based on count and color balance
 - [ ] Menus.
 - - [ ] Hello
 - - [ ] Game over
-- - [ ] Deliver
+- - [x] Deliver
 - [ ] Achievements. Calculate these at gameover, persist, and display at gameover and hello. Record best score and time (independently) for each.
 - - Finish session.
 - - Five valid bouquets.
@@ -111,3 +111,4 @@ Gather flowers of various colors and get scored based on count and color balance
 - [x] Seems like the SE room (test maps) is usually getting the same color for all flowers. And these are the very end of the list. Is something wrong with the RNG at flower placement?
 - - Reviewed a little closer and yes, it does seem to be noticeably eccentric at least half the time.
 - - We were selecting a color based on all available colors, regardless of how many remain. Easy change to pick among the total remaining *flowers* rather than *colors*.
+- [x] I must have messed up the RNG again. Ran out of pink flowers in the third episode. ...forgot to decrement the counters, duh

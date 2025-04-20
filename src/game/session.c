@@ -55,6 +55,7 @@ static void session_reset_flowers() {
         int colorid=0;
         for (i=0;i<COLORC;i++) {
           if ((choice-=remaining_by_color[i])<0) {
+            remaining_by_color[i]--;
             colorid=i;
             break;
           }
@@ -200,4 +201,15 @@ void session_unlisten_flag(int listenerid) {
     }
   }
   fprintf(stderr,"%s !!!! listenerid %d not found !!!! listenerc=%d\n",__func__,listenerid,g.session.flag_listenerc);
+}
+
+/* Add up score.
+ */
+ 
+int session_calculate_score() {
+  const struct summary *summary=g.session.summaryv;
+  int i=g.session.summaryc;
+  int total=0;
+  for (;i-->0;summary++) total+=summary->score;
+  return total;
 }
