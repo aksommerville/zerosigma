@@ -35,6 +35,7 @@ extern struct g {
   int texid_bg;
   int texid_sprites;
   int texid_uibits;
+  int texid_bouquet;
   
   // zs_layer.c
   struct zs_layer **layerv;

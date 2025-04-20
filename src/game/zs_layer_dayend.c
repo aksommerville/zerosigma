@@ -39,7 +39,6 @@ static void _dayend_del(struct zs_layer *layer) {
  
 static void _dayend_update(struct zs_layer *layer,double elapsed,int input,int pvinput) {
   LAYER->clock+=elapsed;
-  //TODO I want some animation, a unique one for each day, that shows the bouquet either doing its job or failing hilariously.
   if ((input&EGG_BTN_SOUTH)&&!(pvinput&EGG_BTN_SOUTH)) {
     layer->defunct=1;
     if (g.session.summaryc>=DAYC) {
@@ -54,14 +53,74 @@ static void _dayend_update(struct zs_layer *layer,double elapsed,int input,int p
  */
  
 static void dayend_render_suitor(struct zs_layer *layer) {
-  //TODO
+  const int startx=0;
+  const int endx=(FBW>>1)-NS_sys_tilesize-3;
+  const double endtime=REVELATION_TIME-1.000;
+  int manx,many=(FBH*3)>>2;
+  int mansrcx,mansrcy=NS_sys_tilesize*9;
+  if (LAYER->clock>=endtime) {
+    manx=endx;
+    if (LAYER->success||(LAYER->clock<REVELATION_TIME)) mansrcx=0;
+    else mansrcx=NS_sys_tilesize*3;
+  } else {
+    manx=startx+(int)(((endx-startx)*LAYER->clock)/endtime);
+    int frame=((int)(LAYER->clock*5.0))&3;
+    switch (frame) {
+      case 0: case 2: mansrcx=0; break;
+      case 1: mansrcx=NS_sys_tilesize; break;
+      case 3: mansrcx=NS_sys_tilesize*2; break;
+    }
+  }
+  graf_draw_decal(&g.graf,g.texid_bouquet,manx+(NS_sys_tilesize>>1)+3,many+4,0,0,NS_sys_tilesize,NS_sys_tilesize,0);
+  graf_draw_tile(&g.graf,g.texid_sprites,manx+(NS_sys_tilesize),many+NS_sys_tilesize,0x94,0);
+  graf_draw_decal(&g.graf,g.texid_sprites,manx,many,mansrcx,mansrcy,NS_sys_tilesize,NS_sys_tilesize<<1,0);
+
+  int ladyx=FBW>>1;
+  int ladyy=many;
+  int ladysrcx=NS_sys_tilesize*5;
+  int ladysrcy=NS_sys_tilesize*9;
+  if (LAYER->clock>=REVELATION_TIME) {
+    if (LAYER->success) {
+      graf_draw_decal(&g.graf,g.texid_sprites,ladyx,ladyy-NS_sys_tilesize,NS_sys_tilesize*7,NS_sys_tilesize*9,NS_sys_tilesize,NS_sys_tilesize,0); // heart
+    } else {
+      ladysrcx+=NS_sys_tilesize;
+      graf_draw_decal(&g.graf,g.texid_sprites,ladyx-8,ladyy+5,NS_sys_tilesize*4,NS_sys_tilesize*10,NS_sys_tilesize,NS_sys_tilesize,0); // slappy hand
+      graf_draw_decal(&g.graf,g.texid_sprites,manx,many-NS_sys_tilesize,NS_sys_tilesize*7,NS_sys_tilesize*10,NS_sys_tilesize,NS_sys_tilesize,0); // pain star
+    }
+  }
+  graf_draw_decal(&g.graf,g.texid_sprites,ladyx,ladyy,ladysrcx,ladysrcy,NS_sys_tilesize,NS_sys_tilesize<<1,0);
 }
 
 /* spinster: Puts the bouquet in a vase, and if imbalanced, the vase breaks.
  */
 
 static void dayend_render_spinster(struct zs_layer *layer) {
-  //TODO
+  int y=((FBH*3)>>2)-NS_sys_tilesize;
+  int tablesrcx=NS_sys_tilesize*8;
+  int ladysrcx=NS_sys_tilesize*2;
+  int ladysrcy=NS_sys_tilesize*7;
+  int endy=y;
+  int starty=endy-NS_sys_tilesize;
+  int bouquety=endy;
+  int bouquetx=(FBW>>1)+(NS_sys_tilesize>>1);
+  uint8_t bouquetxform=0;
+  if (LAYER->clock<REVELATION_TIME) {
+    bouquety=starty+(int)(((endy-starty)*LAYER->clock)/REVELATION_TIME);
+  } else if (!LAYER->success) {
+    bouquetxform=EGG_XFORM_SWAP|EGG_XFORM_YREV;
+    bouquetx+=NS_sys_tilesize/3;
+    bouquety+=NS_sys_tilesize/2;
+  }
+  graf_draw_decal(&g.graf,g.texid_bouquet,bouquetx,bouquety,0,0,NS_sys_tilesize,NS_sys_tilesize,bouquetxform);
+  uint8_t ladyxform=EGG_XFORM_XREV;
+  if ((LAYER->clock>=REVELATION_TIME)&&!LAYER->success) {
+    tablesrcx+=NS_sys_tilesize*2;
+    ladysrcx=NS_sys_tilesize*12;
+    ladysrcy=NS_sys_tilesize*9;
+    ladyxform=0;
+  }
+  graf_draw_decal(&g.graf,g.texid_sprites,(FBW>>1)-NS_sys_tilesize,y,ladysrcx,ladysrcy,NS_sys_tilesize,NS_sys_tilesize<<1,ladyxform);
+  graf_draw_decal(&g.graf,g.texid_sprites,(FBW>>1),y,tablesrcx,NS_sys_tilesize*9,NS_sys_tilesize<<1,NS_sys_tilesize<<1,0);
 }
 
 /* bride: Throws the bouquet to the maids, and if imbalanced, the devil catches it.
@@ -237,12 +296,24 @@ struct zs_layer *zs_layer_spawn_dayend() {
   score_summary(summary);
   
   LAYER->customer=g.session.summaryc-1;
+  //LAYER->customer=1;//XXX
   if (summary->score) {
     egg_play_song(RID_song_flowers_for_you_positive,0,0);
     LAYER->success=1;
   } else {
     egg_play_song(RID_song_flowers_for_you_negative,0,0);
     LAYER->success=0;
+  }
+  
+  //XXX Draw the bouquet if we don't have it yet. In real life, sprite_customer will never fail to do this before we exist.
+  if (!g.texid_bouquet) {
+    g.texid_bouquet=egg_texture_new();
+    egg_texture_load_raw(g.texid_bouquet,NS_sys_tilesize,NS_sys_tilesize,NS_sys_tilesize<<2,0,0);
+    egg_draw_clear(g.texid_bouquet,0);
+    graf_set_output(&g.graf,g.texid_bouquet);
+    graf_draw_tile(&g.graf,g.texid_sprites,NS_sys_tilesize>>1,NS_sys_tilesize>>1,0x25,0);
+    graf_set_output(&g.graf,0);
+    graf_flush(&g.graf);
   }
   
   //XXX TEMP place some labels. We'll replace this soon with juicy counters and an animated sequence showing the bouquet being accepted or rejected.

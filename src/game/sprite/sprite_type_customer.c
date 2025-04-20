@@ -14,7 +14,6 @@ struct sprite_customer {
   int dlgw,dlgh;
   int msgid;
   uint8_t tileid0;
-  int texid_bouquet; // Size is always NS_sys_tilesize**2.
   int bouquetc; // (session.bouquetc) sampled at the time we draw the preview, for change detection.
   double initial_blackout;
 };
@@ -26,7 +25,6 @@ struct sprite_customer {
  
 static void _customer_del(struct sprite *sprite) {
   egg_texture_del(SPRITE->texid_dialogue);
-  egg_texture_del(SPRITE->texid_bouquet);
 }
 
 /* Init.
@@ -72,20 +70,20 @@ static void customer_dialogue(struct sprite *sprite,int msgid) {
 static void customer_require_bouquet(struct sprite *sprite) {
   if (g.session.bouquetc==SPRITE->bouquetc) return;
   SPRITE->bouquetc=g.session.bouquetc;
-  if (!SPRITE->texid_bouquet) {
-    SPRITE->texid_bouquet=egg_texture_new();
-    egg_texture_load_raw(SPRITE->texid_bouquet,NS_sys_tilesize,NS_sys_tilesize,NS_sys_tilesize<<2,0,0);
+  if (!g.texid_bouquet) {
+    g.texid_bouquet=egg_texture_new();
+    egg_texture_load_raw(g.texid_bouquet,NS_sys_tilesize,NS_sys_tilesize,NS_sys_tilesize<<2,0,0);
   }
   
   // Draw image:sprites:0x25 into our texture, then read out the pixels.
   // Even though it's just one op, we must use graf and not plain egg functions -- graf controls the global tint and alpha.
-  egg_draw_clear(SPRITE->texid_bouquet,0);
-  graf_set_output(&g.graf,SPRITE->texid_bouquet);
+  egg_draw_clear(g.texid_bouquet,0);
+  graf_set_output(&g.graf,g.texid_bouquet);
   graf_draw_tile(&g.graf,g.texid_sprites,NS_sys_tilesize>>1,NS_sys_tilesize>>1,0x25,0);
   graf_set_output(&g.graf,0);
   graf_flush(&g.graf);
   uint32_t pixels[NS_sys_tilesize*NS_sys_tilesize]={0};
-  int err=egg_texture_get_pixels(pixels,sizeof(pixels),SPRITE->texid_bouquet);
+  int err=egg_texture_get_pixels(pixels,sizeof(pixels),g.texid_bouquet);
   
   // Image must contain exactly BOUQUET_LIMIT (45) pixels of pure gray. Locate them.
   uint8_t grayv[BOUQUET_LIMIT];
@@ -122,7 +120,7 @@ static void customer_require_bouquet(struct sprite *sprite) {
   }
   
   // Re-upload pixels to the texture.
-  egg_texture_load_raw(SPRITE->texid_bouquet,NS_sys_tilesize,NS_sys_tilesize,NS_sys_tilesize<<2,pixels,sizeof(pixels));
+  egg_texture_load_raw(g.texid_bouquet,NS_sys_tilesize,NS_sys_tilesize,NS_sys_tilesize<<2,pixels,sizeof(pixels));
 }
 
 /* Update.
@@ -181,10 +179,10 @@ static void _customer_render(struct sprite *sprite,int x,int y) {
   }
   
   // If we are showing the ACCEPT text and have a bouquet image, show that floating in front of my face.
-  if ((SPRITE->dlgw>0)&&(SPRITE->msgid==MSGID_ACCEPT)&&SPRITE->texid_bouquet) {
+  if ((SPRITE->dlgw>0)&&(SPRITE->msgid==MSGID_ACCEPT)&&g.texid_bouquet) {
     int bx=x-NS_sys_tilesize-(NS_sys_tilesize>>1);
     int by=y-NS_sys_tilesize-(NS_sys_tilesize>>1);
-    graf_draw_decal(&g.graf,SPRITE->texid_bouquet,bx,by,0,0,NS_sys_tilesize,NS_sys_tilesize,0);
+    graf_draw_decal(&g.graf,g.texid_bouquet,bx,by,0,0,NS_sys_tilesize,NS_sys_tilesize,0);
   }
 }
 
