@@ -80,7 +80,10 @@ static void session_reset_flowers() {
  
 int session_reset() {
   if (g.session.flag_listenerv) free(g.session.flag_listenerv);
+  struct top tmptopv[TOP_COUNT]; // Don't wipe (top).
+  memcpy(tmptopv,g.session.topv,sizeof(tmptopv));
   memset(&g.session,0,sizeof(struct session));
+  memcpy(g.session.topv,tmptopv,sizeof(tmptopv));
   g.session.flagv[NS_flag_zero]=0;
   g.session.flagv[NS_flag_one]=1;
   session_reset_flowers();
@@ -212,4 +215,128 @@ int session_calculate_score() {
   int total=0;
   for (;i-->0;summary++) total+=summary->score;
   return total;
+}
+
+/* High score persistence.
+ * Format is space-delimited postive decimal integers corresponding to (topv[0].time,topv[0].score,...).
+ */
+ 
+void session_top_load() {
+  memset(g.session.topv,0,sizeof(g.session.topv));
+  char src[256];
+  int srcc=egg_store_get(src,sizeof(src),"hiscore",7);
+  if ((srcc<1)||(srcc>sizeof(src))) return;
+  int srcp=0,topp=0,fieldp=0;
+  while (srcp<srcc) {
+    if ((unsigned char)src[srcp]<=0x20) { srcp++; continue; }
+    if ((src[srcp]<'0')||(src[srcp]>'9')) return;
+    int v=0;
+    while ((srcp<srcc)&&(src[srcp]>='0')&&(src[srcp]<='9')) {
+      v*=10;
+      v+=src[srcp++]-'0';
+    }
+    switch (fieldp) {
+      case 0: g.session.topv[topp].time=v; fieldp=1; break;
+      case 1: g.session.topv[topp].score=v; fieldp=0; topp++; if (topp>=TOP_COUNT) return; break;
+    }
+  }
+}
+
+static int decuint_repr(char *dst,int dsta,int src) {
+  if (src<0) src=0;
+  int dstc=0;
+  if (src>=1000000000) dst[dstc++]='0'+(src/1000000000)%10;
+  if (src>= 100000000) dst[dstc++]='0'+(src/ 100000000)%10;
+  if (src>=  10000000) dst[dstc++]='0'+(src/  10000000)%10;
+  if (src>=   1000000) dst[dstc++]='0'+(src/   1000000)%10;
+  if (src>=    100000) dst[dstc++]='0'+(src/    100000)%10;
+  if (src>=     10000) dst[dstc++]='0'+(src/     10000)%10;
+  if (src>=      1000) dst[dstc++]='0'+(src/      1000)%10;
+  if (src>=       100) dst[dstc++]='0'+(src/       100)%10;
+  if (src>=        10) dst[dstc++]='0'+(src/        10)%10;
+  dst[dstc++]='0'+src%10;
+  return dstc;
+}
+
+static void session_top_save() {
+  char tmp[256];
+  const struct top *top=g.session.topv;
+  int i=TOP_COUNT,tmpc=0;
+  for (;i-->0;top++) {
+    tmpc+=decuint_repr(tmp+tmpc,sizeof(tmp)-tmpc,top->time);
+    tmp[tmpc++]=' ';
+    tmpc+=decuint_repr(tmp+tmpc,sizeof(tmp)-tmpc,top->score);
+    if (i) tmp[tmpc++]=' ';
+  }
+  egg_store_set("hiscore",7,tmp,tmpc);
+}
+
+/* Update one top if the incoming score is better than what we have.
+ * Return nonzero if changed.
+ */
+ 
+static int session_top_commit_1(struct top *top,int score,int time) {
+  if (!top->time) { // No previous score was set.
+    top->time=time;
+    top->score=score;
+    top->time_new=1;
+    top->score_new=1;
+    return 1;
+  }
+  int dirty=0;
+  if (time<top->time) {
+    top->time=time;
+    top->time_new=1;
+    dirty=1;
+  }
+  if (score>top->score) {
+    top->score=score;
+    top->score_new=1;
+    dirty=1;
+  }
+  return dirty;
+}
+
+/* Commit loose score into (topv), and save if a record was broken.
+ */
+ 
+void session_top_commit() {
+  fprintf(stderr,"%s\n",__func__);
+  if (g.session.summaryc!=DAYC) return; // We're not looking at a finished game...?
+  
+  int score=0,i=g.session.summaryc,allvalid=1,dirty=0;
+  const struct summary *summary=g.session.summaryv;
+  for (;i-->0;summary++) {
+    score+=summary->score;
+    if (!summary->score) allvalid=0;
+  }
+  int time=(int)(g.session.playtime*1000.0);
+  fprintf(stderr,"score=%d time=%d allvalid=%d mapchangec=%d\n",score,time,allvalid,g.session.mapchangec);
+  
+  // Clear the "new" flags.
+  struct top *top=g.session.topv;
+  for (i=TOP_COUNT;i-->0;top++) top->time_new=top->score_new=0;
+  
+  // FINISHED if you finished at all, which you did.
+  if (session_top_commit_1(g.session.topv+TOP_FINISHED,score,time)) dirty=1;
+  
+  // ALL_VALID if you got points from every customer.
+  if (allvalid) {
+    if (session_top_commit_1(g.session.topv+TOP_ALL_VALID,score,time)) dirty=1;
+  }
+  
+  // ALL_PERFECT if you have 500 points; there's no other way to do that.
+  if (score==500) {
+    if (session_top_commit_1(g.session.topv+TOP_ALL_PERFECT,score,time)) dirty=1;
+  }
+  
+  // HERMIT if you got ALL_VALID and also didn't leave the home map.
+  if (allvalid&&!g.session.mapchangec) {
+    if (session_top_commit_1(g.session.topv+TOP_HERMIT,score,time)) dirty=1;
+  }
+  
+  if (dirty) {
+    fprintf(stderr,"Set a new high score. Saving...\n");
+    session_top_save();
+  }
 }

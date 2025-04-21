@@ -39,7 +39,7 @@ Gather flowers of various colors and get scored based on count and color balance
   R 2025-04-17: Scorekeeping, customers. More music.
   F 2025-04-18: Teleport, squishroom, goat, treadle, flamethrower.
   S 2025-04-19: Sound effects, revised music, started dayend animations in earnest.
-  U 2025-04-20: Dayend animations complete. Map layouts.
+  U 2025-04-20: Dayend animations complete. Map layouts. Persisting achievements, but I'm going to remodel them.
   M 2025-04-21
   T 2025-04-22
   W 2025-04-23
@@ -102,14 +102,15 @@ Gather flowers of various colors and get scored based on count and color balance
 - [x] Sound effects.
 - [ ] Menus.
 - - [ ] Hello
-- - [ ] Game over
+- - [x] Game over -- XXX Remove, just use Hello.
 - - [x] Deliver
-- [ ] Achievements. Calculate these at gameover, persist, and display at gameover and hello. Record best score and time (independently) for each.
+- [x] Achievements. Calculate these at gameover, persist, and display at gameover and hello. Record best score and time (independently) for each.
 - - Finish session.
 - - Five valid bouquets.
 - - Five perfect bouquets.
 - - Bonus tokens to collect?
 - - Five valid bouquets without leaving home. (if there's >=45 on the home screen, it's always possible, and there's 57).
+- [ ] It's weird to show time and score for each achievement, since most are a subset of Five Perfect Bouquets. Model it different.
 - [x] Change the music. `cosmic_balance` is too melancholy and `petal_to_the_metal` is too heroic. They should be fun and silly.
 - - Save `petal_to_the_metal` for something else, it's a great tune.
 - - ...actually I'm not sure. I really do like PTTM. Prioritize the others, maybe keep this.
