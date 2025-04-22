@@ -196,6 +196,7 @@ static void dayend_render_bride(struct zs_layer *layer) {
   if (!LAYER->success&&(LAYER->clock>REVELATION_TIME)) {
     int dstx=FBW/3+(NS_sys_tilesize>>1);
     int dsty=bridey;
+    dsty+=((int)(LAYER->clock*10.0+i))&1;
     int srcx=NS_sys_tilesize*5;
     int srcy=NS_sys_tilesize*11;
     graf_draw_decal(&g.graf,g.texid_bouquet,dstx+10,dsty-6,0,0,NS_sys_tilesize,NS_sys_tilesize,EGG_XFORM_SWAP);
@@ -283,11 +284,11 @@ static void dayend_render_dowager(struct zs_layer *layer) {
 static void dayend_render_parfumier(struct zs_layer *layer) {
 
   // Corporate banner in the background, static.
-  graf_draw_decal(&g.graf,g.texid_uibits,(FBW>>1)+NS_sys_tilesize*3,(FBH>>1)+12,183,1,78,32,0);
+  graf_draw_decal(&g.graf,g.texid_uibits,(FBW>>1)+NS_sys_tilesize*3,(FBH>>1)+20,183,1,78,32,0);
   
   // Establish conveyor belt's position, most of the rest depends on it. Ditto parfumier.
-  int cvw=196,cvh=7;
-  int cvx=(FBW>>1)-(cvw>>1);
+  int cvw=145,cvh=7;
+  int cvx=(FBW>>1)-(196>>1);
   int cvy=FBH-NS_sys_tilesize*2;
   int pfx=(FBW>>1)-NS_sys_tilesize*3;
   int pfy=cvy-NS_sys_tilesize+3;

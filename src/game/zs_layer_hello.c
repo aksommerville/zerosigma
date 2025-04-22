@@ -16,6 +16,8 @@
 #define OPTID_SOUND 29
 #define OPTID_QUIT 30
 
+#define DOTCLOCK_PERIOD 1.500
+
 struct zs_layer_hello {
   struct zs_layer hdr;
   
@@ -42,6 +44,8 @@ struct zs_layer_hello {
   } optionv[OPTION_LIMIT];
   int optionc,optionp;
   double optionclock; // For blinking the arrows.
+  
+  double dotclock; // Increases and loops.
 };
 
 #define LAYER ((struct zs_layer_hello*)layer)
@@ -133,6 +137,8 @@ static void _hello_update(struct zs_layer *layer,double elapsed,int input,int pv
     LAYER->optionclock-=0.500;
   }
   
+  if ((LAYER->dotclock+=elapsed)>=DOTCLOCK_PERIOD) LAYER->dotclock-=DOTCLOCK_PERIOD;
+  
   if ((input&EGG_BTN_LEFT)&&!(pvinput&EGG_BTN_LEFT)) {
     egg_play_sound(RID_sound_uimotion);
     if (--(LAYER->optionp)<0) LAYER->optionp=LAYER->optionc-1;
@@ -186,6 +192,15 @@ static void _hello_render(struct zs_layer *layer) {
       graf_draw_decal(&g.graf,g.texid_uibits,(FBW>>1)-5,dsty+option->h+5,197,34,10,10,EGG_XFORM_SWAP|EGG_XFORM_XREV);
     }
   }
+  
+  // Dot.
+  double t=sin((LAYER->dotclock*M_PI*2.0)/DOTCLOCK_PERIOD)*0.300;
+  double sint=sin(t);
+  int fingerdx=(int)(sint*-8.0);
+  if (sint>0.0) fingerdx--;
+  graf_draw_decal(&g.graf,g.texid_uibits,220+fingerdx,120,153,196,29,27,0);
+  graf_draw_mode7(&g.graf,g.texid_uibits,224,108,243,141,18,50,0.5f,0.5f,t,1);
+  graf_draw_decal(&g.graf,g.texid_uibits,230,95,183,140,58,77,0);
 }
 
 /* Helpers for rendering report bits.
