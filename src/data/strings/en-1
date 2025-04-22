@@ -26,3 +26,11 @@
 18 Total Score
 19 Hermit Award
 20 Miser Award
+
+# Hello messages.
+21 By AK Sommerville
+22 April 2025
+23 For Gamedev.js Jam 2025
+# These two will only appear if you've got a perfect 500 but haven't got the Hermit or Miser awards yet:
+24 Can you win without leaving the first map?
+25 Bonus for winning without walljump, fastfall, or teleport.

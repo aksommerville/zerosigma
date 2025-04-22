@@ -73,6 +73,7 @@ static void hero_indx_changed(struct sprite *sprite) {
     if (SPRITE->ladderx>0.0) {
       SPRITE->ladderx=0.0;
       sprite->suspend_gravity=0;
+      sprite->graviting=1;
     }
   }
 }

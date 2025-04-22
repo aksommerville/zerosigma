@@ -14,7 +14,6 @@ static void hiscore_set_default(struct hiscore *hiscore) {
  */
  
 static void hiscore_decode(const char *src,int srcc) {
-  fprintf(stderr,"%s, %d bytes\n",__func__,srcc);
   int srcp=0,dstp=0;
   while (srcp<srcc) {
     if ((unsigned char)src[srcp]<=0x20) { srcp++; continue; }
@@ -148,19 +147,16 @@ static int hiscore_better(int id,int a,int b) {
  */
 
 void hiscore_commit() {
-  fprintf(stderr,"%s...\n",__func__);
   hiscore_from_session(&g.prevscore);
   g.hiscore.newscores=0;
   uint32_t mask=1;
   int i=0; for (;i<HISCORE_COUNT;i++,mask<<=1) {
     if (!(g.prevscore.validscores&mask)) continue;
     if (!(g.hiscore.validscores&mask)) {
-      fprintf(stderr,"NEW HIGH SCORE #%d: unset => %d\n",i,g.prevscore.v[i]);
       g.hiscore.v[i]=g.prevscore.v[i];
       g.hiscore.validscores|=mask;
       g.hiscore.newscores|=mask;
     } else if (hiscore_better(i,g.prevscore.v[i],g.hiscore.v[i])) {
-      fprintf(stderr,"NEW HIGH SCORE #%d: %d => %d\n",i,g.hiscore.v[i],g.prevscore.v[i]);
       g.hiscore.v[i]=g.prevscore.v[i];
       g.hiscore.validscores|=mask;
       g.hiscore.newscores|=mask;

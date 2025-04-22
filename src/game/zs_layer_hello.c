@@ -3,6 +3,11 @@
  
 #include "zs.h"
 
+#define MSG_LIMIT 5
+#define MSG_TIME 5.000 /* >=MSG_FADE_IN_TIME+MSG_FADE_OUT_TIME */
+#define MSG_FADE_IN_TIME 0.500
+#define MSG_FADE_OUT_TIME 0.500
+
 struct zs_layer_hello {
   struct zs_layer hdr;
   
@@ -12,6 +17,13 @@ struct zs_layer_hello {
   int topw,toph;
   int texid_prev;
   int prevw,prevh;
+  
+  int msgv[MSG_LIMIT];
+  int msgc; // Constant for my life, but not the same every time!
+  int msgp;
+  double msgclock;
+  int msg_texid;
+  int msgw,msgh;
 };
 
 #define LAYER ((struct zs_layer_hello*)layer)
@@ -22,13 +34,29 @@ struct zs_layer_hello {
 static void _hello_del(struct zs_layer *layer) {
   egg_texture_del(LAYER->texid_top);
   egg_texture_del(LAYER->texid_prev);
+  egg_texture_del(LAYER->msg_texid);
+}
+
+/* Redraw msg bits. Caller sets (msgp) valid first.
+ */
+ 
+static void hello_redraw_msg(struct zs_layer *layer) {
+  egg_texture_del(LAYER->msg_texid);
+  LAYER->msg_texid=font_texres_oneline(g.font,1,LAYER->msgv[LAYER->msgp],FBW,0xa0c0a0ff);
+  egg_texture_get_status(&LAYER->msgw,&LAYER->msgh,LAYER->msg_texid);
 }
 
 /* Update.
  */
  
 static void _hello_update(struct zs_layer *layer,double elapsed,int input,int pvinput) {
-  //TODO
+  
+  if ((LAYER->msgclock+=elapsed)>=MSG_TIME) {
+    LAYER->msgclock=0.0;
+    if (++(LAYER->msgp)>=LAYER->msgc) LAYER->msgp=0;
+    hello_redraw_msg(layer);
+  }
+  
   if ((input&EGG_BTN_SOUTH)&&!(pvinput&EGG_BTN_SOUTH)) {
     layer->defunct=1;
     session_reset();
@@ -42,6 +70,18 @@ static void _hello_update(struct zs_layer *layer,double elapsed,int input,int pv
  
 static void _hello_render(struct zs_layer *layer) {
   graf_draw_rect(&g.graf,0,0,FBW,FBH,0x401030ff);
+  graf_draw_decal(&g.graf,g.texid_uibits,0,20,0,240,FBW,44,0);
+  
+  int alpha=0xff;
+  if (LAYER->msgclock<MSG_FADE_IN_TIME) alpha=(int)((LAYER->msgclock*255.0)/MSG_FADE_IN_TIME);
+  else {
+    double rem=MSG_TIME-LAYER->msgclock;
+    if (rem<MSG_FADE_OUT_TIME) alpha=(int)((rem*255.0)/MSG_FADE_OUT_TIME);
+  }
+  if (alpha<0xff) graf_set_alpha(&g.graf,alpha);
+  graf_draw_decal(&g.graf,LAYER->msg_texid,(FBW>>1)-(LAYER->msgw>>1),70,0,0,LAYER->msgw,LAYER->msgh,0);
+  if (alpha<0xff) graf_set_alpha(&g.graf,0xff);
+  
   graf_draw_decal(&g.graf,LAYER->texid_top,1,FBH-LAYER->toph-1,0,0,LAYER->topw,LAYER->toph,0);
   graf_draw_decal(&g.graf,LAYER->texid_prev,(FBW>>1)-(LAYER->prevw>>1),FBH-LAYER->prevh-1,0,0,LAYER->prevw,LAYER->prevh,0);
 }
@@ -109,6 +149,9 @@ static int hello_render_center(uint32_t *dst,int x,int y,const char *src,int src
  */
  
 static void hello_generate_top(struct zs_layer *layer) {
+
+  if (!g.hiscore.validscores) return;
+
   uint32_t *pixels=calloc(FBW*4,FBH);
   if (!pixels) return;
   
@@ -220,6 +263,17 @@ struct zs_layer *zs_layer_spawn_hello() {
   if ((LAYER->texid_prev=egg_texture_new())<1) { layer->defunct=1; return 0; }
   hello_generate_top(layer);
   hello_generate_prev(layer);
+  
+  LAYER->msgv[LAYER->msgc++]=21;
+  LAYER->msgv[LAYER->msgc++]=22;
+  LAYER->msgv[LAYER->msgc++]=23;
+  // Two extra messages if you've got a perfect 500, but haven't got the Miser or Hermit bonuses.
+  // Only show one of them, even if both qualify.
+  if (g.hiscore.v[HISCORE_SCORE]>=500) {
+    if (!(g.hiscore.validscores&(1<<HISCORE_HERMIT_SCORE))) LAYER->msgv[LAYER->msgc++]=24;
+    else if (!(g.hiscore.validscores&(1<<HISCORE_MISER_SCORE))) LAYER->msgv[LAYER->msgc++]=25;
+  }
+  hello_redraw_msg(layer);
   
   return layer;
 }

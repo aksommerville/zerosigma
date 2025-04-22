@@ -125,5 +125,6 @@ Gather flowers of various colors and get scored based on count and color balance
 - - Reviewed a little closer and yes, it does seem to be noticeably eccentric at least half the time.
 - - We were selecting a color based on all available colors, regardless of how many remain. Easy change to pick among the total remaining *flowers* rather than *colors*.
 - [x] I must have messed up the RNG again. Ran out of pink flowers in the third episode. ...forgot to decrement the counters, duh
-- [ ] Playing around fast, I ended up one pixel above the ground on a platform, on map:1. Unclear how. Jump power did not reset until I walked off the platform.
+- [x] Playing around fast, I ended up one pixel above the ground on a platform, on map:1. Unclear how. Jump power did not reset until I walked off the platform.
 - - Happens pretty reliably if you climb onto a ladder from the ground, then climb it back down all the way. Main symptom is you won't be allowed to pick flowers.
+- - Need to cheat `graviting` back on as you exit a ladder. Huh, seems like I was just always hopping off ladders above the ground.
