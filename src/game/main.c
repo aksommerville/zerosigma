@@ -28,6 +28,8 @@ int egg_client_init() {
   }
   
   srand_auto();
+  g.enable_music=1;
+  g.enable_sound=1;
   
   hiscore_load();
   if (!zs_layer_spawn_hello()) return -1;
@@ -80,4 +82,22 @@ void egg_client_render() {
   }
   
   graf_flush(&g.graf);
+}
+
+void zs_toggle_sound() {
+  g.enable_sound=g.enable_sound?0:1;
+}
+
+void zs_toggle_music() {
+  g.enable_music=g.enable_music?0:1;
+  if (g.enable_music) {
+    egg_play_song(g.songid,0,1);
+  } else {
+    egg_play_song(0,0,0);
+  }
+}
+
+void zs_play_song(int rid,int repeat) {
+  g.songid=rid;
+  if (g.enable_music) egg_play_song(rid,0,repeat);
 }

@@ -8,6 +8,14 @@
 #define MSG_FADE_IN_TIME 0.500
 #define MSG_FADE_OUT_TIME 0.500
 
+// OPTID are string indices in strings:1.
+#define OPTION_LIMIT 5
+#define OPTID_PLAY 26
+#define OPTID_INPUT 27
+#define OPTID_MUSIC 28
+#define OPTID_SOUND 29
+#define OPTID_QUIT 30
+
 struct zs_layer_hello {
   struct zs_layer hdr;
   
@@ -18,12 +26,22 @@ struct zs_layer_hello {
   int texid_prev;
   int prevw,prevh;
   
+  // Rotating message, directly below the title. All static.
   int msgv[MSG_LIMIT];
   int msgc; // Constant for my life, but not the same every time!
   int msgp;
   double msgclock;
   int msg_texid;
   int msgw,msgh;
+  
+  // Options in the center, pick one.
+  struct option {
+    int optid;
+    int texid;
+    int w,h;
+  } optionv[OPTION_LIMIT];
+  int optionc,optionp;
+  double optionclock; // For blinking the arrows.
 };
 
 #define LAYER ((struct zs_layer_hello*)layer)
@@ -35,6 +53,11 @@ static void _hello_del(struct zs_layer *layer) {
   egg_texture_del(LAYER->texid_top);
   egg_texture_del(LAYER->texid_prev);
   egg_texture_del(LAYER->msg_texid);
+  struct option *option=LAYER->optionv;
+  int i=LAYER->optionc;
+  for (;i-->0;option++) {
+    egg_texture_del(option->texid);
+  }
 }
 
 /* Redraw msg bits. Caller sets (msgp) valid first.
@@ -44,6 +67,55 @@ static void hello_redraw_msg(struct zs_layer *layer) {
   egg_texture_del(LAYER->msg_texid);
   LAYER->msg_texid=font_texres_oneline(g.font,1,LAYER->msgv[LAYER->msgp],FBW,0xa0c0a0ff);
   egg_texture_get_status(&LAYER->msgw,&LAYER->msgh,LAYER->msg_texid);
+}
+
+/* Option stuff.
+ */
+ 
+static int hello_option_uses_vertical(int optid) {
+  switch (optid) {
+    case OPTID_MUSIC:
+    case OPTID_SOUND:
+      return 1;
+  }
+  return 0;
+}
+
+static int hello_option_rewrite_texture(struct option *option) {
+  if (hello_option_uses_vertical(option->optid)) {
+    char tmp[256];
+    struct strings_insertion insv[]={
+      {'r',.r={.rid=1,.ix=option->optid}},
+      {'r',.r={.rid=1,.ix=32}}, // 31=ON 32=OFF
+    };
+    switch (option->optid) {
+      case OPTID_SOUND: if (g.enable_sound) insv[1].r.ix=31; break;
+      case OPTID_MUSIC: if (g.enable_music) insv[1].r.ix=31; break;
+    }
+    int tmpc=strings_format(tmp,sizeof(tmp),1,33,insv,2);
+    option->texid=font_tex_oneline(g.font,tmp,tmpc,FBW,0xffffffff);
+  } else {
+    option->texid=font_texres_oneline(g.font,1,option->optid,FBW,0xffffffff);
+  }
+  egg_texture_get_status(&option->w,&option->h,option->texid);
+  return 0;
+}
+
+static void hello_activate(struct zs_layer *layer) {
+  // return to suppress the sound effect...
+  switch (LAYER->optionv[LAYER->optionp].optid) {
+    case OPTID_PLAY: {
+        layer->defunct=1;
+        session_reset();
+        scene_reset();
+        zs_layer_spawn_play();
+      } break;
+    case OPTID_INPUT: egg_input_configure(); break;
+    case OPTID_MUSIC: zs_toggle_music(); hello_option_rewrite_texture(LAYER->optionv+LAYER->optionp); break;
+    case OPTID_SOUND: zs_toggle_sound(); hello_option_rewrite_texture(LAYER->optionv+LAYER->optionp); if (!g.enable_sound) return; break;
+    case OPTID_QUIT: egg_terminate(0); return;
+  }
+  egg_play_sound(RID_sound_uiactivate);
 }
 
 /* Update.
@@ -57,21 +129,36 @@ static void _hello_update(struct zs_layer *layer,double elapsed,int input,int pv
     hello_redraw_msg(layer);
   }
   
-  if ((input&EGG_BTN_SOUTH)&&!(pvinput&EGG_BTN_SOUTH)) {
-    layer->defunct=1;
-    session_reset();
-    scene_reset();
-    zs_layer_spawn_play();
+  if ((LAYER->optionclock+=elapsed)>=0.500) {
+    LAYER->optionclock-=0.500;
   }
+  
+  if ((input&EGG_BTN_LEFT)&&!(pvinput&EGG_BTN_LEFT)) {
+    egg_play_sound(RID_sound_uimotion);
+    if (--(LAYER->optionp)<0) LAYER->optionp=LAYER->optionc-1;
+  }
+  if ((input&EGG_BTN_RIGHT)&&!(pvinput&EGG_BTN_RIGHT)) {
+    egg_play_sound(RID_sound_uimotion);
+    if (++(LAYER->optionp)>=LAYER->optionc) LAYER->optionp=0;
+  }
+  if (hello_option_uses_vertical(LAYER->optionv[LAYER->optionp].optid)) {
+    if ((input&EGG_BTN_UP)&&!(pvinput&EGG_BTN_UP)) { hello_activate(layer); return; }
+    if ((input&EGG_BTN_DOWN)&&!(pvinput&EGG_BTN_DOWN)) { hello_activate(layer); return; }
+  }
+  
+  if ((input&EGG_BTN_SOUTH)&&!(pvinput&EGG_BTN_SOUTH)) { hello_activate(layer); return; }
 }
 
 /* Render.
  */
  
 static void _hello_render(struct zs_layer *layer) {
+
+  // Background, title banner.
   graf_draw_rect(&g.graf,0,0,FBW,FBH,0x401030ff);
   graf_draw_decal(&g.graf,g.texid_uibits,0,20,0,240,FBW,44,0);
   
+  // Message.
   int alpha=0xff;
   if (LAYER->msgclock<MSG_FADE_IN_TIME) alpha=(int)((LAYER->msgclock*255.0)/MSG_FADE_IN_TIME);
   else {
@@ -82,8 +169,23 @@ static void _hello_render(struct zs_layer *layer) {
   graf_draw_decal(&g.graf,LAYER->msg_texid,(FBW>>1)-(LAYER->msgw>>1),70,0,0,LAYER->msgw,LAYER->msgh,0);
   if (alpha<0xff) graf_set_alpha(&g.graf,0xff);
   
+  // Score reports.
   graf_draw_decal(&g.graf,LAYER->texid_top,1,FBH-LAYER->toph-1,0,0,LAYER->topw,LAYER->toph,0);
   graf_draw_decal(&g.graf,LAYER->texid_prev,(FBW>>1)-(LAYER->prevw>>1),FBH-LAYER->prevh-1,0,0,LAYER->prevw,LAYER->prevh,0);
+  
+  // Option.
+  const struct option *option=LAYER->optionv+LAYER->optionp;
+  int dstx=(FBW>>1)-(option->w>>1);
+  int dsty=(FBH>>1)-(option->h>>1)+13;
+  graf_draw_decal(&g.graf,option->texid,dstx,dsty,0,0,option->w,option->h,0);
+  if (LAYER->optionclock<0.400) {
+    graf_draw_decal(&g.graf,g.texid_uibits,dstx-15,dsty+(option->h>>1)-5,197,34,10,10,0);
+    graf_draw_decal(&g.graf,g.texid_uibits,dstx+option->w+5,dsty+(option->h>>1)-5,197,34,10,10,EGG_XFORM_XREV);
+    if (hello_option_uses_vertical(option->optid)) {
+      graf_draw_decal(&g.graf,g.texid_uibits,(FBW>>1)-5,dsty-15,197,34,10,10,EGG_XFORM_SWAP);
+      graf_draw_decal(&g.graf,g.texid_uibits,(FBW>>1)-5,dsty+option->h+5,197,34,10,10,EGG_XFORM_SWAP|EGG_XFORM_XREV);
+    }
+  }
 }
 
 /* Helpers for rendering report bits.
@@ -257,7 +359,7 @@ struct zs_layer *zs_layer_spawn_hello() {
   layer->update=_hello_update;
   layer->render=_hello_render;
   
-  egg_play_song(RID_song_wild_flowers_none_can_tame,0,1);
+  zs_play_song(RID_song_wild_flowers_none_can_tame,1);
   
   if ((LAYER->texid_top=egg_texture_new())<1) { layer->defunct=1; return 0; }
   if ((LAYER->texid_prev=egg_texture_new())<1) { layer->defunct=1; return 0; }
@@ -274,6 +376,13 @@ struct zs_layer *zs_layer_spawn_hello() {
     else if (!(g.hiscore.validscores&(1<<HISCORE_MISER_SCORE))) LAYER->msgv[LAYER->msgc++]=25;
   }
   hello_redraw_msg(layer);
+  
+  int optid=26; for (;optid<=30;optid++) {
+    if (LAYER->optionc>=OPTION_LIMIT) break;
+    struct option *option=LAYER->optionv+LAYER->optionc++;
+    option->optid=optid;
+    hello_option_rewrite_texture(option);
+  }
   
   return layer;
 }

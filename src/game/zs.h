@@ -25,6 +25,9 @@ extern struct g {
   struct graf graf;
   struct font *font;
   int pvinput;
+  int enable_sound;
+  int enable_music;
+  int songid;
   
   // zs_res.c
   struct rom_res *resv;
@@ -52,5 +55,10 @@ extern struct g {
   struct hiscore hiscore;
   struct hiscore prevscore;
 } g;
+
+#define egg_play_sound(rid) ({ if (g.enable_sound) egg_play_sound(rid); })
+void zs_toggle_sound();
+void zs_toggle_music(); // Assumes (repeat) when toggling on. This should only be accessible from the Hello menu, whose music does repeat.
+void zs_play_song(int rid,int repeat);
 
 #endif

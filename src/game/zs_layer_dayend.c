@@ -513,10 +513,10 @@ struct zs_layer *zs_layer_spawn_dayend() {
   
   LAYER->customer=g.session.summaryc-1;
   if (summary->score) {
-    egg_play_song(RID_song_flowers_for_you_positive,0,0);
+    zs_play_song(RID_song_flowers_for_you_positive,0);
     LAYER->success=1;
   } else {
-    egg_play_song(RID_song_flowers_for_you_negative,0,0);
+    zs_play_song(RID_song_flowers_for_you_negative,0);
     LAYER->success=0;
   }
   

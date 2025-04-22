@@ -34,3 +34,13 @@
 # These two will only appear if you've got a perfect 500 but haven't got the Hermit or Miser awards yet:
 24 Can you win without leaving the first map?
 25 Bonus for winning without walljump, fastfall, or teleport.
+
+# Hello options.
+26 Play
+27 Input
+28 Music
+29 Sound
+30 Quit
+31 ON
+32 OFF
+33 %0: %1
