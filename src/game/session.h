@@ -17,12 +17,6 @@
 
 #define DAYC 5
 
-#define TOP_FINISHED 0 /* Completed the game at all, even with zero points. */
-#define TOP_ALL_VALID 1 /* Five valid bouquets. */
-#define TOP_ALL_PERFECT 2 /* Five perfect bouquets, score can only be 500. */
-#define TOP_HERMIT 3 /* Five valid bouquets without leaving home. */
-#define TOP_COUNT 4
-
 #define COLORC 5
 struct color {
   uint8_t r,g,b;
@@ -69,13 +63,7 @@ struct session {
   int broadcast_in_progress;
   
   int mapchangec; // Counts loads of non-home maps. For detecting the don't-leave-home achievement.
-  
-  struct top {
-    int time; // ms, zero if not achieved
-    int score;
-    int time_new; // Nonzero if (time) was set in the last session, highlight it.
-    int score_new; // '' score
-  } topv[TOP_COUNT];
+  int miser; // Starts nonzero, goes zero when you use fastfall, walljump, or teleport.
 };
 
 int session_reset();
@@ -95,8 +83,5 @@ int session_listen_flag(int flagid,void (*cb)(int flagid,int v,void *userdata),v
 void session_unlisten_flag(int listenerid);
 
 int session_calculate_score(); // Just the sum of summaryv[].score.
-
-void session_top_load(); // Read from  egg's persistence. Do only at init.
-void session_top_commit(); // Populate (g.session.topv) and write to egg's persistence if warranted.
 
 #endif

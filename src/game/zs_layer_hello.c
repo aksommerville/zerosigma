@@ -5,8 +5,13 @@
 
 struct zs_layer_hello {
   struct zs_layer hdr;
+  
+  // Reports for the top scores and most recent session.
+  // Either or both can be empty (eg both are empty the first time we launch).
   int texid_top;
   int topw,toph;
+  int texid_prev;
+  int prevw,prevh;
 };
 
 #define LAYER ((struct zs_layer_hello*)layer)
@@ -16,6 +21,7 @@ struct zs_layer_hello {
  
 static void _hello_del(struct zs_layer *layer) {
   egg_texture_del(LAYER->texid_top);
+  egg_texture_del(LAYER->texid_prev);
 }
 
 /* Update.
@@ -37,9 +43,11 @@ static void _hello_update(struct zs_layer *layer,double elapsed,int input,int pv
 static void _hello_render(struct zs_layer *layer) {
   graf_draw_rect(&g.graf,0,0,FBW,FBH,0x401030ff);
   graf_draw_decal(&g.graf,LAYER->texid_top,1,FBH-LAYER->toph-1,0,0,LAYER->topw,LAYER->toph,0);
+  graf_draw_decal(&g.graf,LAYER->texid_prev,(FBW>>1)-(LAYER->prevw>>1),FBH-LAYER->prevh-1,0,0,LAYER->prevw,LAYER->prevh,0);
 }
 
-/* Generate the top scores texture.
+/* Helpers for rendering report bits.
+ * Destination must be sized (FBW,FBH).
  */
  
 static int hello_repr_time(char *dst,int dsta,int ms) {
@@ -77,47 +85,119 @@ static int hello_repr_decuint(char *dst,int dsta,int src) {
   return dstc;
 }
 
-static void hello_render_right(uint32_t *dst,int x,int y,const char *src,int srcc) {
-  int w=font_measure_line(g.font,src,srcc);
-  font_render_string(dst,FBW,FBH,FBW<<2,x-w,y,g.font,src,srcc,0xffffffff);
+static int hello_repr_hiscore(char *dst,int dsta,int id,int v) {
+  switch (id) {
+    case HISCORE_TIME:
+    case HISCORE_VALID_TIME:
+    case HISCORE_PERFECT_TIME:
+      return hello_repr_time(dst,dsta,v);
+  }
+  return hello_repr_decuint(dst,dsta,v);
 }
+
+static int hello_render_right(uint32_t *dst,int x,int y,const char *src,int srcc,uint32_t rgba) {
+  int w=font_measure_line(g.font,src,srcc);
+  return font_render_string(dst,FBW,FBH,FBW<<2,x-w,y,g.font,src,srcc,rgba);
+}
+
+static int hello_render_center(uint32_t *dst,int x,int y,const char *src,int srcc,uint32_t rgba) {
+  int w=font_measure_line(g.font,src,srcc);
+  return font_render_string(dst,FBW,FBH,FBW<<2,x-(w>>1),y,g.font,src,srcc,rgba);
+}
+
+/* Generate the top scores texture.
+ */
  
 static void hello_generate_top(struct zs_layer *layer) {
   uint32_t *pixels=calloc(FBW*4,FBH);
   if (!pixels) return;
   
-  int timew=font_measure_line(g.font,"WW:WW.WWW",9);
-  int scorew=font_measure_line(g.font,"WWW",3);
+  int leftw=font_measure_line(g.font,"WW:WW.WWW",9);
   int margin=5;
-  const char *lockedname=0;
-  int lockednamec=strings_get(&lockedname,1,13);
   int lineh=font_get_line_height(g.font);
   
-  int dsty=0,i=0,maxw=1;
-  const struct top *top=g.session.topv;
-  for (;i<TOP_COUNT;i++,top++) {
-    int w=timew+margin+scorew+margin;
-    if (top->time) {
-      char tmp[16];
-      int tmpc=hello_repr_time(tmp,sizeof(tmp),top->time);
-      hello_render_right(pixels,timew,dsty,tmp,tmpc);
-      tmpc=hello_repr_decuint(tmp,sizeof(tmp),top->score);
-      hello_render_right(pixels,timew+margin+scorew,dsty,tmp,tmpc);
-      const char *src=0;
-      int srcc=strings_get(&src,1,14+i);
-      w+=font_render_string(pixels,FBW,FBH,FBW<<2,w,dsty,g.font,src,srcc,0xffffffff);
+  int dsty=lineh,i=0,maxw=1;
+  uint32_t bit=1;
+  const int *v=g.hiscore.v;
+  for (;i<HISCORE_COUNT;i++,v++,bit<<=1) {
+    int w=leftw+margin;
+    if (!(g.hiscore.validscores&bit)) {
+      w+=font_render_string(pixels,FBW,FBH,FBW<<2,w,dsty,g.font,"???",3,0x808080ff);
     } else {
-      hello_render_right(pixels,timew,dsty,"--:--.---",9);
-      hello_render_right(pixels,timew+margin+scorew,dsty,"---",3);
-      w+=font_render_string(pixels,FBW,FBH,FBW<<2,w,dsty,g.font,lockedname,lockednamec,0xffffffff);
+      uint32_t color=(g.hiscore.newscores&bit)?0xffff00ff:hiscore_is_perfect(i,*v)?0xffc060ff:0xa0c0f0ff;
+      char tmp[16];
+      int tmpc=hello_repr_hiscore(tmp,sizeof(tmp),i,*v);
+      if ((tmpc>0)&&(tmpc<=sizeof(tmp))) {
+        hello_render_right(pixels,leftw,dsty,tmp,tmpc,color);
+      }
+      const char *src=0;
+      int srcc=strings_get(&src,1,15+i);
+      w+=font_render_string(pixels,FBW,FBH,FBW<<2,w,dsty,g.font,src,srcc,color);
     }
     if (w>maxw) maxw=w;
     dsty+=lineh;
   }
+  // Add "High Scores" at the top, now that we know the full width.
+  const char *src=0;
+  int srcc=strings_get(&src,1,13);
+  hello_render_center(pixels,maxw>>1,0,src,srcc,0xffffffff);
   
   LAYER->topw=maxw;
   LAYER->toph=dsty;
   egg_texture_load_raw(LAYER->texid_top,LAYER->topw,LAYER->toph,FBW<<2,pixels,FBW*FBH*4);
+  free(pixels);
+}
+
+/* Generate the recent score texture.
+ */
+ 
+static void hello_generate_prev(struct zs_layer *layer) {
+
+  // The first time we run, there will never be anything to show here. Get out fast if so.
+  if (!g.prevscore.validscores) return;
+
+  uint32_t *pixels=calloc(FBW*4,FBH);
+  if (!pixels) return;
+  int lineh=font_get_line_height(g.font);
+  
+  // Draw everything line by line centered in the framebuffer -- we'll crop both left and right at upload.
+  int maxw=1,dsty=0,srcc,tmpc,w;
+  char tmp[16];
+  const char *src;
+  
+  srcc=strings_get(&src,1,14);
+  w=hello_render_center(pixels,FBW>>1,dsty,src,srcc,0xffffffff);
+  if (w>maxw) maxw=w;
+  dsty+=lineh;
+  
+  tmpc=hello_repr_time(tmp,sizeof(tmp),g.prevscore.v[HISCORE_TIME]);
+  w=hello_render_center(pixels,FBW>>1,dsty,tmp,tmpc,0xa0c0f0ff);
+  if (w>maxw) maxw=w;
+  dsty+=lineh;
+  
+  tmpc=hello_repr_decuint(tmp,sizeof(tmp),g.prevscore.v[HISCORE_SCORE]);
+  w=hello_render_center(pixels,FBW>>1,dsty,tmp,tmpc,0xa0c0f0ff);
+  if (w>maxw) maxw=w;
+  dsty+=lineh;
+  
+  if (g.prevscore.validscores&(1<<HISCORE_HERMIT_SCORE)) {
+    srcc=strings_get(&src,1,15+HISCORE_HERMIT_SCORE);
+    w=hello_render_center(pixels,FBW>>1,dsty,src,srcc,0xffff00ff);
+    if (w>maxw) maxw=w;
+    dsty+=lineh;
+  }
+  
+  if (g.prevscore.validscores&(1<<HISCORE_MISER_SCORE)) {
+    srcc=strings_get(&src,1,15+HISCORE_MISER_SCORE);
+    w=hello_render_center(pixels,FBW>>1,dsty,src,srcc,0xffff00ff);
+    if (w>maxw) maxw=w;
+    dsty+=lineh;
+  }
+  
+  if (maxw>FBW) maxw=FBW;
+  LAYER->prevw=maxw;
+  LAYER->prevh=dsty;
+  egg_texture_load_raw(LAYER->texid_prev,LAYER->prevw,LAYER->prevh,FBW<<2,pixels+(FBW>>1)-(LAYER->prevw>>1),FBW*FBH*4);
   free(pixels);
 }
 
@@ -137,7 +217,9 @@ struct zs_layer *zs_layer_spawn_hello() {
   egg_play_song(RID_song_wild_flowers_none_can_tame,0,1);
   
   if ((LAYER->texid_top=egg_texture_new())<1) { layer->defunct=1; return 0; }
+  if ((LAYER->texid_prev=egg_texture_new())<1) { layer->defunct=1; return 0; }
   hello_generate_top(layer);
+  hello_generate_prev(layer);
   
   return layer;
 }

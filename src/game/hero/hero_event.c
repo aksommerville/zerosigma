@@ -162,6 +162,7 @@ static void hero_indy_changed(struct sprite *sprite) {
     SPRITE->fastfall_clock=0.0;
     SPRITE->echo_record=999;
     sprite->gravity=sprite->terminal_velocity=HERO_FASTFALL_VELOCITY;
+    g.session.miser=0;
     return;
   }
 
@@ -174,6 +175,7 @@ static void hero_indy_changed(struct sprite *sprite) {
       SPRITE->fastfall_clock=0.0;
       SPRITE->echo_record=999;
       sprite->gravity=sprite->terminal_velocity=HERO_FASTFALL_VELOCITY;
+      g.session.miser=0;
     } else if (SPRITE->fastfall) {
       SPRITE->fastfall=0;
       SPRITE->echo_record=0;
@@ -186,8 +188,6 @@ static void hero_indy_changed(struct sprite *sprite) {
     SPRITE->echo_record=0;
     sprite->terminal_velocity=DEFAULT_TERMINAL_VELOCITY;
   }
-
-  //TODO Duck.
 }
 
 /* Begin down jump.
@@ -218,6 +218,7 @@ static void hero_walljump(struct sprite *sprite,double dx) {
     sprite->xform=EGG_XFORM_XREV;
   }
   hero_begin_echo(sprite,10);
+  g.session.miser=0;
 }
 
 /* Jump input.
@@ -307,6 +308,7 @@ static void hero_teleport(struct sprite *sprite) {
     uint32_t arg=sprite->xform;
     struct sprite *teleghost=sprite_spawn_type(ox,sprite->y,&sprite_type_teleghost,arg);
     SPRITE->teleport_highlight=HERO_TELEPORT_HIGHLIGHT_TIME;
+    g.session.miser=0;
   } else {
     egg_play_sound(RID_sound_teleport_reject);
     SPRITE->teleport_highlight=HERO_TELEPORT_REJECT_TIME;

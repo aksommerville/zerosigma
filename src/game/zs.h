@@ -17,6 +17,7 @@
 #include "session.h"
 #include "scene.h"
 #include "physics.h"
+#include "hiscore.h"
 
 extern struct g {
   void *rom;
@@ -48,6 +49,8 @@ extern struct g {
   
   struct session session;
   struct scene scene;
+  struct hiscore hiscore;
+  struct hiscore prevscore;
 } g;
 
 #endif

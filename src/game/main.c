@@ -29,7 +29,7 @@ int egg_client_init() {
   
   srand_auto();
   
-  session_top_load();
+  hiscore_load();
   if (!zs_layer_spawn_hello()) return -1;
   
   return 0;

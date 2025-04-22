@@ -40,7 +40,7 @@ Gather flowers of various colors and get scored based on count and color balance
   F 2025-04-18: Teleport, squishroom, goat, treadle, flamethrower.
   S 2025-04-19: Sound effects, revised music, started dayend animations in earnest.
   U 2025-04-20: Dayend animations complete. Map layouts. Persisting achievements, but I'm going to remodel them.
-  M 2025-04-21
+  M 2025-04-21: Revised scoring model, display scores at hello
   T 2025-04-22
   W 2025-04-23
   R 2025-04-24
@@ -66,18 +66,18 @@ Gather flowers of various colors and get scored based on count and color balance
 - - [x] Try an instant horizontal teleport, say 2.5 m. ...love it
 - [x] It's still possible to finish a walljump and end up walking backward (facing the wall). Did it twice but can't reproduce reliably.
 - - REPRO: Turn around as you press walljump, and release jump immediately.
-- [ ] Hazards and challenges. Nothing actually harmful, I don't want HP or even die-and-respawn. But things that knock you back, paralyze you...
+- [x] Hazards and challenges. Nothing actually harmful, I don't want HP or even die-and-respawn. But things that knock you back, paralyze you...
 - - [x] Things to break by fastfalling.
 - - [x] A few flowers that become unreachable after fastfall-breaking something, have to pick them before.
 - - - We can probably do this with a squishroom: Put a oneway platform 5 meters above it that could only be reached by jumping from the squishroom.
 - - [x] Walljump across a 1-meter outcrop.
 - - [x] 2-meter outcrop? It's possible but very difficult.
 - - [x] Goat that eats flowers if you wake him up.
-- - [ ] Monkey that grabs your back and restricts jumping.
+- - xxx Monkey that grabs your back and restricts jumping.
 - - [x] Treadle-triggered flamethrower, burns the flowers.
-- - [ ] Crush-o-matic, forces you to the edge you entered from.
-- - [ ] Elevator that drops when you hold a treadle. Must fastfall after it to reach the next level.
-- - [ ] Can we arrange a challenge that requires you to interrupt a fastfall?
+- - xxx Crush-o-matic, forces you to the edge you entered from.
+- - xxx Elevator that drops when you hold a treadle. Must fastfall after it to reach the next level.
+- - [x] Can we arrange a challenge that requires you to interrupt a fastfall?
 - - [x] Short platforms high up. Far enough apart that eventually you can't make it without teleporting! ...already ready
 - [x] Proper maps.
 - - [x] Each of the 6 outer maps should be split into pre- and post-challenge. No more than 9 flowers post-challenge, so as long as you enter fresh, you won't need to enter twice.
@@ -110,7 +110,7 @@ Gather flowers of various colors and get scored based on count and color balance
 - - Five perfect bouquets.
 - - Bonus tokens to collect?
 - - Five valid bouquets without leaving home. (if there's >=45 on the home screen, it's always possible, and there's 57).
-- [ ] It's weird to show time and score for each achievement, since most are a subset of Five Perfect Bouquets. Model it different.
+- [x] It's weird to show time and score for each achievement, since most are a subset of Five Perfect Bouquets. Model it different.
 - [x] Change the music. `cosmic_balance` is too melancholy and `petal_to_the_metal` is too heroic. They should be fun and silly.
 - - Save `petal_to_the_metal` for something else, it's a great tune.
 - - ...actually I'm not sure. I really do like PTTM. Prioritize the others, maybe keep this.
@@ -125,3 +125,5 @@ Gather flowers of various colors and get scored based on count and color balance
 - - Reviewed a little closer and yes, it does seem to be noticeably eccentric at least half the time.
 - - We were selecting a color based on all available colors, regardless of how many remain. Easy change to pick among the total remaining *flowers* rather than *colors*.
 - [x] I must have messed up the RNG again. Ran out of pink flowers in the third episode. ...forgot to decrement the counters, duh
+- [ ] Playing around fast, I ended up one pixel above the ground on a platform, on map:1. Unclear how. Jump power did not reset until I walked off the platform.
+- - Happens pretty reliably if you climb onto a ladder from the ground, then climb it back down all the way. Main symptom is you won't be allowed to pick flowers.

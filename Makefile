@@ -8,8 +8,8 @@ clean:;rm -rf mid out
 else
 
 OPT_ENABLE:=stdlib graf text rom
-PROJNAME:=zerosigma
-PROJRDNS:=com.aksommerville.egggame.zerosigma
+PROJNAME:=wicked_garden
+PROJRDNS:=com.aksommerville.egggame.wicked_garden
 ENABLE_SERVER_AUDIO:=
 BUILDABLE_DATA_TYPES:=
 NATIVE_RUN_ARGS:=--audio=pulse
