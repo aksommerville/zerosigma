@@ -44,7 +44,7 @@ Apologies for the mismatched repo name! At first I was calling the game "Zero Si
   U 2025-04-20: Dayend animations complete. Map layouts. Persisting achievements, but I'm going to remodel them.
   M 2025-04-21: Revised scoring model, display scores at hello
   T 2025-04-22: Options and Dot pic at Hello. Lil fixes.
-  W 2025-04-23
+  W 2025-04-23: Fleshed out graphics, esp terrain.
   R 2025-04-24
   F 2025-04-25
   S 2025-04-26
@@ -136,3 +136,4 @@ Apologies for the mismatched repo name! At first I was calling the game "Zero Si
 - - OK I don't see any easy wins here, so let's live with the ~7%
 - [ ] Fill the tilesheet with terrain and decorative graphics, and place them all around.
 - [ ] Something more interesting for the background graphics? Flat blue sky isn't bad, but maybe some clouds or birds or a distant landscape that scrolls parallax?
+- [ ] Decorative bees flying from flower to flower?
