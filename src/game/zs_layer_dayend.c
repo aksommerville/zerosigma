@@ -87,6 +87,7 @@ static void dayend_render_suitor(struct zs_layer *layer) {
   int ladysrcy=NS_sys_tilesize*9;
   if (LAYER->clock>=REVELATION_TIME) {
     if (LAYER->success) {
+      ladysrcx=NS_sys_tilesize*14;
       graf_draw_decal(&g.graf,g.texid_sprites,ladyx,ladyy-NS_sys_tilesize,NS_sys_tilesize*7,NS_sys_tilesize*9,NS_sys_tilesize,NS_sys_tilesize,0); // heart
     } else {
       ladysrcx+=NS_sys_tilesize;
@@ -196,7 +197,7 @@ static void dayend_render_bride(struct zs_layer *layer) {
   if (!LAYER->success&&(LAYER->clock>REVELATION_TIME)) {
     int dstx=FBW/3+(NS_sys_tilesize>>1);
     int dsty=bridey;
-    dsty+=((int)(LAYER->clock*10.0+i))&1;
+    dsty+=((int)(LAYER->clock*5.0+i))&1;
     int srcx=NS_sys_tilesize*5;
     int srcy=NS_sys_tilesize*11;
     graf_draw_decal(&g.graf,g.texid_bouquet,dstx+10,dsty-6,0,0,NS_sys_tilesize,NS_sys_tilesize,EGG_XFORM_SWAP);

@@ -133,3 +133,10 @@ Apologies for the mismatched repo name! At first I was calling the game "Zero Si
 - [x] NW: Make some variety in the pit, it's boring.
 - [x] SW: Can I prevent the player from scaling the left wall instead of the right?
 - [x] Web (Egg): Bouquet is not showing colors. Dollars to donuts, it's `egg_texture_read_pixels`
+- [x] Performance: I'm getting ~7% regularly, which is fine, but it ought to be more like ~4%. I suspect the flower rendering is producing unnecessary churn.
+- - [x] Turn off flower rendering to confirm. ...FALSE! We get down near 6% with flower rendering off, but not the dramatic drop I expected. Not worth taking extraordinary measures.
+- - [x] Easy: Don't render sprites when they're offscreen. ...was already doing this for flowers
+- - [x] Hard: Make a new programmatic tilesheet for flowers, populate at map load. ...not worth the trouble or risk
+- - [x] Check all the things that iterate the whole sprite list. Sprite-on-sprite collisions, eg? ...win back about 1% with physics completely stubbed.
+- - - There's room for improvement in here, eg a separate index of physics-relevant sprites. But I think that's more effort than the gain is worth.
+- - OK I don't see any easy wins here, so let's live with the ~7%

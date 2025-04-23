@@ -53,7 +53,7 @@ static void hero_animate(struct sprite *sprite,double elapsed) {
   SPRITE->animclock+=0.100;
   
   // Walking: Cycle 0..7
-  if (SPRITE->walkdx) {
+  if (SPRITE->walkdx&&SPRITE->seated) {
     if (++(SPRITE->animframe)>=8) SPRITE->animframe=0;
     
   // Not walking: Stop at 0 or 4.
@@ -317,6 +317,8 @@ static void _hero_render(struct sprite *sprite,int x,int y) {
     col=9;
   } else if (SPRITE->walljump) {
     col=10;
+  } else if (!SPRITE->seated) {
+    col=14;
   } else {
     switch (SPRITE->animframe) {
       case 0: break;
