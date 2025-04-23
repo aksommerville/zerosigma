@@ -196,7 +196,7 @@ static void _hello_render(struct zs_layer *layer) {
   // Dot.
   double t=sin((LAYER->dotclock*M_PI*2.0)/DOTCLOCK_PERIOD)*0.300;
   double sint=sin(t);
-  int fingerdx=(int)(sint*-8.0);
+  int fingerdx=(int)(sint*-10.0);
   if (sint>0.0) fingerdx--;
   graf_draw_decal(&g.graf,g.texid_uibits,220+fingerdx,120,153,196,29,27,0);
   graf_draw_mode7(&g.graf,g.texid_uibits,224,108,243,141,18,50,0.5f,0.5f,t,1);

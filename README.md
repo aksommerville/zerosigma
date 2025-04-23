@@ -6,6 +6,8 @@ Submission for Gamedev.js Jam 2025, theme "BALANCE".
 
 Gather flowers of various colors and get scored based on count and color balance.
 
+Apologies for the mismatched repo name! At first I was calling the game "Zero Sigma Florist", but decided I didn't care for that name.
+
 ## Timeline
 
 ```
@@ -41,7 +43,7 @@ Gather flowers of various colors and get scored based on count and color balance
   S 2025-04-19: Sound effects, revised music, started dayend animations in earnest.
   U 2025-04-20: Dayend animations complete. Map layouts. Persisting achievements, but I'm going to remodel them.
   M 2025-04-21: Revised scoring model, display scores at hello
-  T 2025-04-22: Options and Dot pic at Hello.
+  T 2025-04-22: Options and Dot pic at Hello. Lil fixes.
   W 2025-04-23
   R 2025-04-24
   F 2025-04-25
@@ -128,5 +130,6 @@ Gather flowers of various colors and get scored based on count and color balance
 - [x] Playing around fast, I ended up one pixel above the ground on a platform, on map:1. Unclear how. Jump power did not reset until I walked off the platform.
 - - Happens pretty reliably if you climb onto a ladder from the ground, then climb it back down all the way. Main symptom is you won't be allowed to pick flowers.
 - - Need to cheat `graviting` back on as you exit a ladder. Huh, seems like I was just always hopping off ladders above the ground.
-- [ ] NW: Make some variety in the pit, it's boring.
-- [ ] SW: Can I prevent the player from scaling the left wall instead of the right?
+- [x] NW: Make some variety in the pit, it's boring.
+- [x] SW: Can I prevent the player from scaling the left wall instead of the right?
+- [x] Web (Egg): Bouquet is not showing colors. Dollars to donuts, it's `egg_texture_read_pixels`
