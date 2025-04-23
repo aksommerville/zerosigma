@@ -187,7 +187,7 @@ static void hero_update_flower(struct sprite *sprite) {
   int col=(int)sprite->x,row=(int)sprite->y;
   if ((col<0)||(col>=g.scene.map->w)||(row<0)||(row>=g.scene.map->h)) return;
   uint8_t tileid=g.scene.map->v[row*g.scene.map->w+col];
-  if ((tileid<0x05)||(tileid>0x08)) return;
+  if (!TILE_IS_FLOWER(tileid)) return;
   int flowerp=session_flowerp_by_location(g.scene.map->rid,col,row);
   if (flowerp<0) return;
   

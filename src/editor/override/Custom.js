@@ -67,6 +67,8 @@ export class Custom {
         for (let i=map.v.length; i-->0; ) {
           if ((map.v[i] >= 0x05) && (map.v[i] <= 0x08)) {
             flowerc++;
+          } else if (map.v[i] === 0xab) {
+            flowerc++;
           }
         }
         total += flowerc;

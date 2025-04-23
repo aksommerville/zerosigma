@@ -42,7 +42,7 @@ static void session_reset_flowers() {
     const uint8_t *v=map->v;
     int row=0; for (;row<map->h;row++) {
       int col=0; for (;col<map->w;col++,v++) {
-        if ((*v<0x05)||(*v>0x08)) continue;
+        if (!TILE_IS_FLOWER(*v)) continue;
         if (g.session.flowerc>=FLOWER_LIMIT) {
           fprintf(stderr,"!!! Too many flowers (%d).\n",FLOWER_LIMIT);
           return;

@@ -61,4 +61,6 @@ void zs_toggle_sound();
 void zs_toggle_music(); // Assumes (repeat) when toggling on. This should only be accessible from the Hello menu, whose music does repeat.
 void zs_play_song(int rid,int repeat);
 
+#define TILE_IS_FLOWER(tileid) ((((tileid)>=0x05)&&((tileid)<=0x08))||((tileid)==0xab))
+
 #endif
