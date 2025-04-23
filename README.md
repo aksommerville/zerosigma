@@ -94,13 +94,7 @@ Apologies for the mismatched repo name! At first I was calling the game "Zero Si
 - - - - [x] Walljump over 1-meter outcrop. sw
 - - - - [x] Make the goat press a button. s
 - - - - [x] Teleport thru a pillar. se
-- - [ ] Can I make 6 different regional graphics variations?
-- - - [ ] Forest
-- - - [ ] Desert
-- - - [ ] Mountaintop
-- - - [ ] City
-- - - [ ] Prairie
-- - - [ ] Graveyard
+- - [x] Can I make 6 different regional graphics variations? ...we don't have enough tilesheet or time for fully unique regions. Instead just fill the tilesheet and place things willy nilly.
 - [x] Sound effects.
 - [x] Menus.
 - - [x] Hello
@@ -140,3 +134,5 @@ Apologies for the mismatched repo name! At first I was calling the game "Zero Si
 - - [x] Check all the things that iterate the whole sprite list. Sprite-on-sprite collisions, eg? ...win back about 1% with physics completely stubbed.
 - - - There's room for improvement in here, eg a separate index of physics-relevant sprites. But I think that's more effort than the gain is worth.
 - - OK I don't see any easy wins here, so let's live with the ~7%
+- [ ] Fill the tilesheet with terrain and decorative graphics, and place them all around.
+- [ ] Something more interesting for the background graphics? Flat blue sky isn't bad, but maybe some clouds or birds or a distant landscape that scrolls parallax?
