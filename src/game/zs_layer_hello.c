@@ -162,7 +162,7 @@ static void _hello_render(struct zs_layer *layer) {
 
   // Background, title banner.
   graf_draw_rect(&g.graf,0,0,FBW,FBH,0x401030ff);
-  graf_draw_decal(&g.graf,g.texid_uibits,0,20,0,240,FBW,44,0);
+  graf_draw_decal(&g.graf,g.texid_uibits,0,20,0,240,FBW,46,0);
   
   // Message.
   int alpha=0xff;
