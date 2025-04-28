@@ -12,7 +12,7 @@ PROJNAME:=wicked_garden
 PROJRDNS:=com.aksommerville.egggame.wicked_garden
 ENABLE_SERVER_AUDIO:=
 BUILDABLE_DATA_TYPES:=
-NATIVE_RUN_ARGS:=--audio=pulse
+#NATIVE_RUN_ARGS:=--audio=pulse
 
 ifndef EGG_SDK
   EGG_SDK:=/home/andy/proj/egg

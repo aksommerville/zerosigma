@@ -40,6 +40,8 @@ extern struct g {
   int texid_sprites;
   int texid_uibits;
   int texid_bouquet;
+  uint32_t *bouquetbits; // 16x16xRGBA, contains image:sprites:0x25, with the (bouquetgrayv) pixels volatile
+  uint8_t bouquetgrayv[BOUQUET_LIMIT]; // Positions in bouquetbits of gray pixels
   
   // zs_layer.c
   struct zs_layer **layerv;
@@ -62,5 +64,9 @@ void zs_toggle_music(); // Assumes (repeat) when toggling on. This should only b
 void zs_play_song(int rid,int repeat);
 
 #define TILE_IS_FLOWER(tileid) ((((tileid)>=0x05)&&((tileid)<=0x08))||((tileid)==0xab))
+
+/* Rewrites (g.texid_bouquet) based on (g.session.bouquetv), which should be finished.
+ */
+void refresh_bouquet_image();
 
 #endif
